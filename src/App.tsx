@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./components/ui/card";
 import { Input } from "./components/ui/input";
@@ -24,13 +25,20 @@ import {
   Users,
   GraduationCap,
   Briefcase,
-  ChevronRight
+  ChevronRight,
+  ArrowRight,
+  ShieldCheck,
+  Building2,
+  Building,
+  Phone,
+  User
 } from "lucide-react";
 
 const ENTITY_ID = "64b77babcc3c21610787b060";
 const SESSION = "2026-27";
 
-const PRIMARY_BLUE = "#1a365d"; // Darker shade of blue
+// Wisdom World School Color Palette
+const PRIMARY_GREEN = "#0f4a25"; // Deep Forest Green
 
 function LoginScreen({ onLoginSuccess }: { onLoginSuccess: (token: string) => void }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -53,32 +61,41 @@ function LoginScreen({ onLoginSuccess }: { onLoginSuccess: (token: string) => vo
   };
 
   return (
-    <div className="min-h-screen bg-[#fafaf6] flex items-center justify-center p-4">
-      <Card className="w-full max-w-sm border-none shadow-2xl bg-white animate-fade-in text-center p-4">
-        <CardHeader className="space-y-6 pb-8">
-          <div className="flex justify-center items-center gap-4">
-            <div className="p-3 bg-white rounded-2xl shadow-lg border border-slate-50">
-              <img src="/wws.jpeg" alt="Wisdom Logo" className="w-16 h-16 object-contain" />
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 relative overflow-hidden">
+      {/* Modern Background Decor */}
+      <div className="absolute top-0 left-0 w-full h-[45vh] bg-gradient-to-b from-[#0f4a25] to-[#146031] -skew-y-2 transform origin-top-left -translate-y-12 shadow-2xl"></div>
+
+      <Card className="w-full max-w-md border-0 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.2)] bg-white/95 backdrop-blur-xl animate-in zoom-in-95 text-center p-8 rounded-[2rem] relative z-10 mt-10">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-1 bg-[#dbb13b] rounded-b-full"></div>
+        <CardHeader className="space-y-6 pb-10">
+          <div className="flex justify-center items-center">
+            <div className="p-4 bg-white rounded-full shadow-2xl border border-slate-100 ring-8 ring-slate-100/50 -mt-20 flex items-center justify-center">
+              <img src="/wws.jpeg" alt="Wisdom Logo" className="w-24 h-24 object-contain rounded-full" />
             </div>
           </div>
-          <div className="space-y-1">
-            <CardTitle className="text-3xl font-black" style={{ color: PRIMARY_BLUE }}>Front Desk</CardTitle>
-            <CardDescription className="text-slate-500 font-medium tracking-tight">Access Secure Dashboard</CardDescription>
+          <div className="space-y-3">
+            <CardTitle className="text-4xl font-extrabold tracking-tight text-[#0f4a25]">Front Desk</CardTitle>
+            <CardDescription className="text-slate-500 font-medium text-lg leading-snug">Secure Campus & Visitor<br />Management System</CardDescription>
           </div>
         </CardHeader>
         <CardContent className="space-y-8">
-          <Button onClick={handleAutoLogin} className="w-full h-14 text-white text-lg font-bold transition-all shadow-lg active:scale-95" style={{ backgroundColor: PRIMARY_BLUE }} disabled={isLoading}>
-            {isLoading ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : "Get Started"}
+          <Button onClick={handleAutoLogin} className="w-full h-14 text-white text-lg font-bold transition-all shadow-xl hover:shadow-[#0f4a25]/20 hover:scale-[1.02] active:scale-95 rounded-xl bg-[#0f4a25] hover:bg-[#146031]" disabled={isLoading}>
+            {isLoading ? <Loader2 className="h-6 w-6 animate-spin mr-2" /> : <span className="flex items-center gap-2">Access Dashboard <ArrowRight className="w-5 h-5" /></span>}
           </Button>
 
-          <div className="flex flex-col items-center gap-3 pt-4 border-t border-slate-50">
-            <div className="text-[9px] uppercase tracking-[0.3em] text-slate-300 font-black">Powered & Secured By</div>
-            <img src="/od.png" alt="Okie Dokie" className="h-8 transition-all" />
+          <div className="flex flex-col items-center gap-3 pt-8 border-t border-slate-100">
+            <div className="text-[10px] uppercase tracking-widest text-slate-400 font-bold flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-[#dbb13b]" /> System Managed By
+            </div>
+            <img src="/od.png" alt="Okie Dokie" className="h-8 transition-all grayscale hover:grayscale-0 opacity-60 hover:opacity-100" />
           </div>
         </CardContent>
       </Card>
-    </div>
 
+      {/* Decorative Orbs */}
+      <div className="absolute bottom-20 left-20 w-64 h-64 bg-[#dbb13b]/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute top-1/2 right-20 w-96 h-96 bg-[#0f4a25]/5 rounded-full blur-3xl pointer-events-none"></div>
+    </div>
   );
 }
 
@@ -188,7 +205,6 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
 
   const updateWithLiveData = (liveData: any, profile: any) => {
     if (!liveData) return;
-    console.log("Live Student Data Keys:", Object.keys(liveData));
     setSelectedProfile((prev: any) => ({
       ...prev,
       ...liveData,
@@ -202,7 +218,6 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
   };
 
   const selectProfile = async (profile: any) => {
-    // Set basic profile and API photo immediately so user sees it instantly
     const initialPhotos = { apiPhoto: extractFileId(profile.photo) };
     setSelectedProfile({ ...profile, photos: initialPhotos });
 
@@ -210,7 +225,6 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
     setShowDropdown(false);
     setSearchQuery("");
 
-    // Background sync for parent/archival photos
     if (formData.toMeetType === "student") {
       setIsRefreshingProfile(true);
       try {
@@ -304,70 +318,83 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
   };
 
   return (
-    <div className="min-h-screen bg-[#fdfcf8] p-6 lg:p-12 font-sans text-slate-900 selection:bg-slate-200">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-[#0f4a25]/20 pb-20">
       {/* Camera Modal Overlay */}
       {isCameraOpen && (
-        <div className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
-          <Card className="w-full max-w-2xl bg-slate-900 border-slate-800 overflow-hidden shadow-2xl animate-in zoom-in-95">
-            <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950">
-              <h3 className="text-white font-black uppercase tracking-widest text-[10px]">Capture Visitor Photo</h3>
-              <Button variant="ghost" size="icon" onClick={stopCamera} className="text-slate-400 hover:text-white"><X className="w-5 h-5" /></Button>
+        <div className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-md flex items-center justify-center p-4">
+          <Card className="w-full max-w-2xl bg-slate-900 border-none overflow-hidden shadow-2xl animate-in zoom-in-95 rounded-3xl">
+            <div className="p-5 border-b border-white/10 flex justify-between items-center bg-slate-950">
+              <h3 className="text-white font-black uppercase tracking-widest text-[11px] flex items-center gap-2"><Camera className="w-4 h-4 text-[#dbb13b]" /> Capture Photo</h3>
+              <Button variant="ghost" size="icon" onClick={stopCamera} className="text-slate-400 hover:text-white rounded-full"><X className="w-5 h-5" /></Button>
             </div>
             <div className="aspect-video bg-black relative">
               <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover mirror" />
-              <div className="absolute inset-0 border-[20px] border-black/20 pointer-events-none flex items-center justify-center">
-                <div className="w-64 h-80 border-2 border-dashed border-white/50 rounded-2xl" />
+              <div className="absolute inset-0 border-[24px] border-black/40 pointer-events-none flex items-center justify-center">
+                <div className="w-64 h-80 border-2 border-dashed border-[#dbb13b]/80 rounded-3xl shadow-[0_0_0_9999px_rgba(0,0,0,0.5)]" />
               </div>
             </div>
             <div className="p-8 flex justify-center bg-slate-950">
-              <Button onClick={takePhoto} className="h-16 w-16 rounded-full bg-white hover:bg-slate-200 shadow-xl flex items-center justify-center group">
-                <div className="h-12 w-12 rounded-full border-4 border-slate-950 flex items-center justify-center group-active:scale-90 transition-all" />
+              <Button onClick={takePhoto} className="h-16 w-16 rounded-full bg-white hover:bg-slate-200 shadow-[0_0_20px_rgba(255,255,255,0.3)] flex items-center justify-center group">
+                <div className="h-12 w-12 rounded-full border-[5px] border-slate-950 flex items-center justify-center group-active:scale-90 transition-all" />
               </Button>
             </div>
           </Card>
         </div>
       )}
 
-      {/* Header */}
-      <div className="max-w-6xl mx-auto flex justify-between items-end mb-10 pb-6 border-b border-slate-100">
-        <div className="flex items-center gap-6">
-          <div className="p-2 bg-white rounded-2xl shadow-sm border border-slate-50">
-            <img src="/wws.jpeg" alt="Wisdom Logo" className="w-14 h-14 object-contain" />
-          </div>
-          <h1 className="text-3xl font-black tracking-tighter" style={{ color: PRIMARY_BLUE }}>
-            Front Desk <span className="text-slate-300 font-light">/ Visitor</span>
-          </h1>
-        </div>
+      {/* Hero Header */}
+      <div className="bg-[#0f4a25] pt-10 pb-36 px-6 lg:px-12 rounded-b-[3rem] shadow-xl relative z-0 overflow-hidden">
+        {/* Subtle patterned background for header */}
+        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/always-grey.png')] pointer-events-none"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20"></div>
 
-        <div className="flex items-center gap-8">
-          <div className="flex flex-col items-end gap-1 px-4 border-r border-slate-100">
-            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-300">System Managed By</span>
-            <img src="/od.png" alt="Okie Dokie" className="h-8" />
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
+          <div className="flex items-center gap-6">
+            <div className="p-2 border-4 border-white/20 bg-white rounded-full shadow-2xl backdrop-blur-sm">
+              <img src="/wws.jpeg" alt="Wisdom Logo" className="w-16 h-16 object-contain rounded-full" />
+            </div>
+            <div className="text-white">
+              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight flex items-center gap-3">
+                Front Desk <span className="text-[#dbb13b] text-2xl">/</span> <span className="font-light text-emerald-100">Visitor</span>
+              </h1>
+              <p className="text-emerald-200/80 text-sm font-medium tracking-wide mt-1">Wisdom World School - Kurukshetra</p>
+            </div>
           </div>
-          <Button variant="ghost" onClick={onLogout} className="text-slate-400 hover:text-rose-500 font-bold text-xs uppercase tracking-widest transition-all">
-            <Lock className="w-3 h-3 mr-2" /> Logout
-          </Button>
+
+          <div className="flex items-center gap-6 bg-black/20 backdrop-blur-xl px-5 py-3 rounded-2xl border border-white/10 shadow-inner">
+            <div className="flex flex-col items-end gap-1 px-4 border-r border-white/10">
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#dbb13b]">Powered By</span>
+              <img src="/od.png" alt="Okie Dokie" className="h-5 brightness-200 contrast-200" />
+            </div>
+            <Button variant="ghost" onClick={onLogout} className="text-white hover:text-white hover:bg-rose-500/80 font-bold text-xs uppercase tracking-widest transition-all rounded-xl h-10 px-4">
+              <Lock className="w-3 h-3 mr-2" /> Logout
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto grid grid-cols-1 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 -mt-24 z-10 relative grid grid-cols-1 gap-8">
+
         {/* Main Interface */}
         <div className="space-y-8">
-          {/* Top Toggle & Search */}
-          <Card className="border-none shadow-xl shadow-slate-100 overflow-visible bg-white relative z-50">
-            <CardContent className="p-8">
-              <div className="flex flex-col md:flex-row items-center gap-8">
-                {/* Meeting Type Toggle */}
-                <div className="w-full md:w-auto shrink-0 space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: PRIMARY_BLUE }}>I am here to meet</Label>
+          {/* Top Toggle & Search - Made highly visible */}
+          <Card className="border-0 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] overflow-visible bg-white relative rounded-3xl mx-auto w-full z-50 ring-1 ring-slate-100 p-2">
+            <CardContent className="p-6 md:p-8">
+              <div className="flex flex-col xl:flex-row items-center gap-8">
+
+                {/* Meeting Type Toggle - Redesigned to be massive and clear */}
+                <div className="w-full xl:w-[400px] shrink-0 space-y-4">
+                  <Label className="text-xs font-black uppercase tracking-widest text-[#0f4a25] flex items-center gap-2">
+                    <Users className="w-4 h-4 text-[#dbb13b]" /> I am here to meet
+                  </Label>
                   <RadioGroup
                     value={formData.toMeetType}
                     onValueChange={(val) => { setFormData(prev => ({ ...prev, toMeetType: val })); setSelectedProfile(null); setSearchQuery(""); }}
-                    className="flex p-1 bg-slate-50 rounded-xl"
+                    className="flex p-1.5 bg-slate-100/80 rounded-2xl w-full border border-slate-200/60"
                   >
                     {['employee', 'student', 'other'].map((type) => (
-                      <div key={type} className="flex-1 min-w-[100px]">
-                        <label className={`flex items-center justify-center h-10 rounded-lg cursor-pointer transition-all font-bold text-xs uppercase tracking-tight ${formData.toMeetType === type ? 'bg-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`} style={formData.toMeetType === type ? { color: PRIMARY_BLUE } : {}}>
+                      <div key={type} className="flex-1">
+                        <label className={`flex items-center justify-center py-3.5 px-2 rounded-xl cursor-pointer transition-all font-bold text-sm uppercase tracking-wider ${formData.toMeetType === type ? 'bg-white shadow-[0_8px_16px_-6px_rgba(0,0,0,0.1)] text-[#0f4a25] ring-1 ring-slate-200/50 scale-[1.02]' : 'text-slate-500 hover:text-[#0f4a25] hover:bg-slate-200/50'}`}>
                           <RadioGroupItem value={type} className="sr-only" />
                           {type}
                         </label>
@@ -376,42 +403,48 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
                   </RadioGroup>
                 </div>
 
+                {/* Divider */}
+                <div className="hidden xl:block w-px h-20 bg-slate-100"></div>
+
                 {/* Live Lookup Search */}
-                <div className="flex-1 w-full space-y-3" ref={dropdownRef}>
-                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                    Search {formData.toMeetType} (Quick Select)
+                <div className="flex-1 w-full space-y-4" ref={dropdownRef}>
+                  <Label className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                    <Search className="w-4 h-4 text-[#dbb13b]" /> Quick Search Profile
                   </Label>
                   <div className="relative group">
                     <Input
-                      placeholder={`Search by name or number...`}
+                      placeholder={`Search ${formData.toMeetType} by name, phone or ID...`}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="h-12 pl-12 pr-4 border-none bg-slate-50 rounded-xl focus-visible:ring-2 focus-visible:ring-[#1a365d]/20 transition-all font-medium text-slate-700"
+                      className="h-16 pl-14 pr-6 border-2 border-slate-100 bg-slate-50/50 rounded-2xl focus-visible:ring-4 focus-visible:ring-[#0f4a25]/10 focus-visible:border-[#0f4a25] focus-visible:bg-white transition-all font-bold text-lg text-slate-700 shadow-sm placeholder:font-medium placeholder:text-slate-400"
                     />
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-slate-900 transition-colors" />
+                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400 group-focus-within:text-[#0f4a25] transition-colors" />
 
                     {showDropdown && (
-                      <Card className="absolute top-full left-0 right-0 mt-2 z-[100] border border-slate-50 shadow-2xl rounded-2xl overflow-hidden max-h-72 bg-white animate-in fade-in slide-in-from-top-2">
+                      <Card className="absolute top-[calc(100%+0.5rem)] left-0 right-0 z-[100] border-0 shadow-2xl rounded-2xl overflow-hidden max-h-80 bg-white animate-in fade-in slide-in-from-top-2 ring-1 ring-slate-100">
                         <div className="divide-y divide-slate-50">
                           {isFetchingData && searchResults.length === 0 ? (
-                            <div className="p-8 flex flex-col items-center gap-2 text-slate-300 font-bold uppercase tracking-widest text-[10px]">
-                              <Loader2 className="w-6 h-6 animate-spin" style={{ color: PRIMARY_BLUE }} /> FETCHING...
+                            <div className="p-10 flex flex-col items-center gap-3 text-slate-400 font-bold uppercase tracking-widest text-xs">
+                              <Loader2 className="w-8 h-8 animate-spin text-[#0f4a25]" /> LOADING DIRECTORY...
                             </div>
                           ) : searchResults.length === 0 ? (
-                            <div className="p-8 text-center text-slate-400 italic text-sm">No matches found for "{searchQuery}"</div>
+                            <div className="p-10 text-center flex flex-col items-center gap-3 text-slate-400">
+                              <Building2 className="w-10 h-10 text-slate-200" />
+                              <span className="font-semibold text-sm">No matches found for "{searchQuery}"</span>
+                            </div>
                           ) : (
                             searchResults.map((profile) => (
-                              <button key={profile._id} onClick={() => selectProfile(profile)} className="w-full px-5 py-4 flex items-center gap-4 text-left hover:bg-slate-50 transition-colors group">
-                                <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center font-black border border-slate-100 uppercase" style={{ color: PRIMARY_BLUE }}>
+                              <button key={profile._id} onClick={() => selectProfile(profile)} className="w-full px-6 py-4 flex items-center gap-5 text-left hover:bg-[#eaf1ec] transition-colors group">
+                                <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center font-black text-lg border border-slate-200 uppercase text-[#0f4a25] group-hover:bg-white group-hover:shadow-sm transition-all">
                                   {profile.name?.[0]}
                                 </div>
                                 <div className="flex-1 overflow-hidden">
-                                  <div className="text-sm font-black text-slate-800 truncate group-hover:text-slate-900 transition-colors">{profile.name}</div>
-                                  <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tight truncate">
+                                  <div className="text-base font-black text-slate-800 truncate group-hover:text-[#0f4a25] transition-colors">{profile.name}</div>
+                                  <div className="text-xs text-slate-500 font-bold uppercase tracking-tight truncate mt-0.5">
                                     {formData.toMeetType === 'student' ? `${profile.regNo} • ${profile.course}` : `${profile.employeeId} • ${profile.department}`}
                                   </div>
                                 </div>
-                                <ChevronRight className="w-4 h-4 text-slate-200 group-hover:translate-x-1 transition-all" />
+                                <ChevronRight className="w-5 h-5 text-slate-300 group-hover:translate-x-1 group-hover:text-[#0f4a25] transition-all" />
                               </button>
                             ))
                           )}
@@ -426,62 +459,74 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
 
           {/* Profile Card & Form Area */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+
             {/* Form Fields */}
-            <Card className="lg:col-span-2 border-none shadow-xl shadow-slate-100 bg-white">
-              <CardContent className="p-10">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Visitor Name (Outdoor Person)</Label>
-                    <Input id="name" value={formData.name} onChange={handleInputChange} className="border-0 border-b-2 border-slate-100 rounded-none px-0 h-10 bg-transparent focus-visible:ring-0 focus-visible:border-[#1a365d] font-bold text-slate-800 transition-all" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Mobile Number</Label>
-                    <Input id="mobile" value={formData.mobile} onChange={handleInputChange} className="border-0 border-b-2 border-slate-100 rounded-none px-0 h-10 bg-transparent focus-visible:ring-0 focus-visible:border-[#1a365d] font-bold text-slate-800 transition-all" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Organization / Company</Label>
-                    <Input id="organizationName" value={formData.organizationName} onChange={handleInputChange} className="border-0 border-b-2 border-slate-100 rounded-none px-0 h-10 bg-transparent focus-visible:ring-0 focus-visible:border-[#1a365d] font-bold text-slate-800 transition-all" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wider" style={{ color: PRIMARY_BLUE }}>Person To Meet</Label>
-                    <Input id="toMeet" value={formData.toMeet} onChange={handleInputChange} className="border-0 border-b-2 border-slate-100 rounded-none px-0 h-10 bg-transparent focus-visible:ring-0 focus-visible:border-[#1a365d] font-bold transition-all" style={{ color: PRIMARY_BLUE }} />
-                  </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Address / Location</Label>
-                    <Input id="address" value={formData.address} onChange={handleInputChange} className="border-0 border-b-2 border-slate-100 rounded-none px-0 h-10 bg-transparent focus-visible:ring-0 focus-visible:border-[#1a365d] font-bold text-slate-800 transition-all" />
-                  </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Purpose of Visit (Regarding)</Label>
-                    <Textarea id="regarding" value={formData.regarding} onChange={handleInputChange} className="min-h-[60px] border-0 border-b-2 border-slate-100 rounded-none px-0 bg-transparent focus-visible:ring-0 focus-visible:border-[#1a365d] font-medium text-slate-500 resize-none transition-all" />
+            <Card className="lg:col-span-2 border-0 shadow-xl bg-white rounded-3xl ring-1 ring-slate-100 overflow-hidden">
+              <div className="h-2 w-full bg-gradient-to-r from-[#0f4a25] via-[#146031] to-[#dbb13b]"></div>
+              <CardContent className="p-8 md:p-10">
+                <div className="mb-10 flex items-center gap-4">
+                  <div className="bg-[#eaf1ec] p-3 rounded-2xl text-[#0f4a25]"><Briefcase className="w-6 h-6" /></div>
+                  <div>
+                    <h3 className="text-2xl font-black text-[#0f4a25]">Visitor Details</h3>
+                    <p className="text-slate-500 text-sm font-medium mt-1">Please provide accurate information for the visitor pass.</p>
                   </div>
                 </div>
 
-                <div className="mt-12 flex justify-between items-center bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                  <div className="flex gap-4 items-center">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+                  <div className="space-y-3">
+                    <Label className="text-[11px] font-black uppercase text-slate-400 tracking-wider">Visitor Name (Outdoor Person)</Label>
+                    <Input id="name" placeholder="E.g. John Doe" value={formData.name} onChange={handleInputChange} className="h-14 border-x-0 border-t-0 border-b-2 border-slate-200 rounded-none px-2 bg-transparent focus-visible:ring-0 focus-visible:border-[#0f4a25] font-bold text-slate-800 text-base shadow-none transition-all" />
+                  </div>
+                  <div className="space-y-3">
+                    <Label className="text-[11px] font-black uppercase text-slate-400 tracking-wider">Mobile Number</Label>
+                    <Input id="mobile" placeholder="E.g. +91 9876543210" value={formData.mobile} onChange={handleInputChange} className="h-14 border-x-0 border-t-0 border-b-2 border-slate-200 rounded-none px-2 bg-transparent focus-visible:ring-0 focus-visible:border-[#0f4a25] font-bold text-slate-800 text-base shadow-none transition-all" />
+                  </div>
+                  <div className="space-y-3">
+                    <Label className="text-[11px] font-black uppercase text-slate-400 tracking-wider">Organization / Company</Label>
+                    <Input id="organizationName" placeholder="E.g. Acme Corp" value={formData.organizationName} onChange={handleInputChange} className="h-14 border-x-0 border-t-0 border-b-2 border-slate-200 rounded-none px-2 bg-transparent focus-visible:ring-0 focus-visible:border-[#0f4a25] font-bold text-slate-800 text-base shadow-none transition-all" />
+                  </div>
+                  <div className="space-y-3">
+                    <Label className="text-[11px] font-black uppercase text-[#0f4a25] tracking-wider bg-[#eaf1ec] px-2 py-1 rounded inline-block">Person To Meet</Label>
+                    <Input id="toMeet" placeholder="Select from search above..." value={formData.toMeet} onChange={handleInputChange} className="h-14 border-x-0 border-t-0 border-b-2 border-[#0f4a25]/30 rounded-none px-2 bg-transparent focus-visible:ring-0 focus-visible:border-[#0f4a25] font-black text-[#0f4a25] text-lg shadow-none transition-all placeholder:font-semibold placeholder:text-[#0f4a25]/40" />
+                  </div>
+                  <div className="space-y-3 md:col-span-2 mt-2">
+                    <Label className="text-[11px] font-black uppercase text-slate-400 tracking-wider">Address / Location</Label>
+                    <Input id="address" placeholder="Full residential or office address" value={formData.address} onChange={handleInputChange} className="h-14 border-x-0 border-t-0 border-b-2 border-slate-200 rounded-none px-2 bg-transparent focus-visible:ring-0 focus-visible:border-[#0f4a25] font-bold text-slate-800 text-base shadow-none transition-all" />
+                  </div>
+                  <div className="space-y-3 md:col-span-2 mt-2">
+                    <Label className="text-[11px] font-black uppercase text-slate-400 tracking-wider">Purpose of Visit (Regarding)</Label>
+                    <Textarea id="regarding" placeholder="Briefly describe the reason for this visit..." value={formData.regarding} onChange={handleInputChange} className="min-h-[80px] border-x-0 border-t-0 border-b-2 border-slate-200 rounded-none px-2 py-4 bg-transparent focus-visible:ring-0 focus-visible:border-[#0f4a25] font-semibold text-slate-700 text-base shadow-none resize-none transition-all" />
+                  </div>
+                </div>
+
+                <div className="mt-12 flex flex-col xl:flex-row justify-between items-center bg-slate-50 p-6 md:p-8 rounded-[2rem] border border-slate-100 gap-8">
+                  {/* Photo Capture Section */}
+                  <div className="flex gap-4 items-center w-full xl:w-auto">
                     <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept="image/*" className="hidden" />
                     {!visitorPhoto ? (
-                      <>
-                        <Button variant="outline" onClick={startCamera} className="h-12 px-6 rounded-xl border-slate-200 bg-white hover:bg-slate-50 flex gap-2 font-bold text-xs uppercase tracking-tight text-slate-600 transition-all"><Camera className="w-4 h-4" /> Camera</Button>
-                        <Button variant="outline" onClick={() => fileInputRef.current?.click()} className="h-12 px-6 rounded-xl border-slate-200 bg-white hover:bg-slate-50 flex gap-2 font-bold text-xs uppercase tracking-tight text-slate-600 transition-all"><Upload className="w-4 h-4" /> Upload</Button>
-                      </>
+                      <div className="flex gap-3 w-full">
+                        <Button variant="outline" onClick={startCamera} className="flex-1 xl:flex-none h-14 px-6 rounded-xl border-slate-200 bg-white hover:bg-[#eaf1ec] hover:border-[#0f4a25]/20 hover:text-[#0f4a25] flex gap-2 font-bold text-xs uppercase tracking-tight text-slate-600 transition-all shadow-sm"><Camera className="w-5 h-5" /> Camera</Button>
+                        <Button variant="outline" onClick={() => fileInputRef.current?.click()} className="flex-1 xl:flex-none h-14 px-6 rounded-xl border-slate-200 bg-white hover:bg-[#eaf1ec] hover:border-[#0f4a25]/20 hover:text-[#0f4a25] flex gap-2 font-bold text-xs uppercase tracking-tight text-slate-600 transition-all shadow-sm"><Upload className="w-5 h-5" /> Upload</Button>
+                      </div>
                     ) : (
-                      <div className="flex items-center gap-4 animate-in fade-in slide-in-from-left-2">
+                      <div className="flex items-center gap-5 animate-in fade-in slide-in-from-left-4 bg-white p-3 pr-6 rounded-2xl shadow-sm border border-slate-100">
                         <div className="relative group">
-                          <img src={visitorPhoto} alt="Visitor" className="w-16 h-16 rounded-xl object-cover border-2 border-white shadow-md" />
-                          <button onClick={() => setVisitorPhoto(null)} className="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-3 h-3" /></button>
+                          <img src={visitorPhoto} alt="Visitor" className="w-20 h-20 rounded-[1rem] object-cover border-2 border-white shadow-md" />
+                          <button onClick={() => setVisitorPhoto(null)} className="absolute -top-3 -right-3 bg-rose-500 text-white rounded-full p-1.5 shadow-lg opacity-0 group-hover:opacity-100 hover:bg-rose-600 hover:scale-110 transition-all"><X className="w-4 h-4" /></button>
                         </div>
-                        <div className="flex flex-col">
-                          <span className="text-[8px] font-black uppercase tracking-widest text-emerald-500">Image Attached</span>
-                          <Button variant="link" onClick={() => setVisitorPhoto(null)} className="p-0 h-auto text-[10px] font-bold text-slate-400 hover:text-rose-500">Retake Photo</Button>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-[#0f4a25] flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3" /> Image Ready</span>
+                          <Button variant="link" onClick={() => setVisitorPhoto(null)} className="p-0 h-auto text-xs font-bold text-slate-400 hover:text-rose-500 justify-start">Retake Photo</Button>
                         </div>
                       </div>
                     )}
                   </div>
 
-                  <div className="flex flex-col items-end gap-3">
-                    {submitStatus === "success" && <div className="flex items-center gap-2 text-emerald-600 text-[10px] font-black uppercase tracking-wider animate-in fade-in scale-in-95"><CheckCircle2 className="w-3 h-3" /> Registration Successful</div>}
-                    <Button onClick={handleAddVisitor} className="text-white px-12 h-14 rounded-xl font-black uppercase tracking-widest transition-all shadow-xl active:scale-95" style={{ backgroundColor: PRIMARY_BLUE }} disabled={isSubmitting || submitStatus === "success"}>
-                      {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Complete Registration"}
+                  {/* Submit Section */}
+                  <div className="flex flex-col items-center xl:items-end gap-3 w-full xl:w-auto">
+                    {submitStatus === "success" && <div className="flex items-center gap-2 text-emerald-600 text-[11px] font-black uppercase tracking-wider animate-in fade-in slide-in-from-bottom-2 bg-emerald-50 px-4 py-2 rounded-full"><CheckCircle2 className="w-4 h-4" /> Registration Successful</div>}
+                    <Button onClick={handleAddVisitor} className="w-full xl:w-auto text-white px-10 h-16 rounded-2xl font-black uppercase tracking-widest transition-all shadow-[0_8px_20px_-6px_rgba(15,74,37,0.5)] hover:shadow-[0_12px_25px_-6px_rgba(15,74,37,0.6)] hover:-translate-y-0.5 active:translate-y-0 text-sm" style={{ backgroundColor: PRIMARY_GREEN }} disabled={isSubmitting || submitStatus === "success" || !formData.toMeet || !formData.name}>
+                      {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin mx-8" /> : "Generate Pass"}
                     </Button>
                   </div>
                 </div>
@@ -489,71 +534,81 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
             </Card>
 
             {/* Selection Details Sidebar */}
-            <div className="space-y-6">
+            <div className="space-y-6 lg:sticky lg:top-8">
               {selectedProfile ? (
-                <Card className="border-none shadow-2xl overflow-hidden animate-in slide-in-from-right-4 duration-500 text-white" style={{ backgroundColor: PRIMARY_BLUE }}>
-                  <div className="p-8 space-y-6">
+                <Card className="border-0 shadow-2xl overflow-hidden animate-in slide-in-from-right-4 duration-500 text-white rounded-3xl relative p-1" style={{ backgroundColor: PRIMARY_GREEN }}>
+                  {/* Decorative Elements */}
+                  <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+                  <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#dbb13b]/20 rounded-full blur-2xl pointer-events-none"></div>
+
+                  <div className="bg-[#0f4a25] rounded-[1.5rem] relative z-10 p-8 space-y-8 h-full border border-white/10">
                     <div className="flex justify-between items-start">
-                      <div className="bg-white/10 p-2 rounded-lg relative">
-                        {formData.toMeetType === 'student' ? <GraduationCap className="w-6 h-6" /> : <Briefcase className="w-6 h-6" />}
-                        {isRefreshingProfile && <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-lg"><Loader2 className="w-3 h-3 animate-spin" /></div>}
+                      <div className="bg-white/10 p-3 rounded-2xl relative shadow-inner border border-white/5">
+                        {formData.toMeetType === 'student' ? <GraduationCap className="w-7 h-7 text-[#dbb13b]" /> : <Building className="w-7 h-7 text-[#dbb13b]" />}
+                        {isRefreshingProfile && <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-2xl backdrop-blur-sm"><Loader2 className="w-4 h-4 animate-spin text-white" /></div>}
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => { setSelectedProfile(null); setFormData(prev => ({ ...prev, toMeet: "" })); }} className="h-8 w-8 text-white/50 hover:text-white hover:bg-white/10">
-                        <X className="w-4 h-4" />
+                      <Button variant="ghost" size="icon" onClick={() => { setSelectedProfile(null); setFormData(prev => ({ ...prev, toMeet: "" })); }} className="h-10 w-10 text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-colors">
+                        <X className="w-5 h-5" />
                       </Button>
                     </div>
 
-                    <div className="space-y-1">
-                      <div className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">Meeting With</div>
-                      <h3 className="text-2xl font-black tracking-tight leading-tight">{selectedProfile.name}</h3>
+                    <div className="space-y-2">
+                      <div className="text-[10px] font-black uppercase tracking-widest text-[#dbb13b]">Target Profile</div>
+                      <h3 className="text-3xl font-extrabold tracking-tight leading-tight">{selectedProfile.name}</h3>
                     </div>
 
                     {/* Photo Gallery for Students */}
                     {formData.toMeetType === 'student' && selectedProfile.photos && (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-2 py-4">
+                      <div className="grid grid-cols-2 gap-3 py-2">
                         {[
                           { id: selectedProfile.photos.apiPhoto, label: 'Profile' },
                           { id: selectedProfile.photos.student, label: 'Student' },
                           { id: selectedProfile.photos.father, label: 'Father' },
                           { id: selectedProfile.photos.mother, label: 'Mother' }
                         ].filter(p => p.id).map((photo, idx) => (
-                          <div key={idx} className="space-y-1.5 translate-y-0 hover:-translate-y-1 transition-transform">
-                            <div className="aspect-[3/4] rounded-lg bg-white/10 overflow-hidden border border-white/5 relative group cursor-pointer shadow-lg">
+                          <div key={idx} className="space-y-2 group cursor-pointer">
+                            <div className="aspect-[3/4] rounded-xl bg-black/20 overflow-hidden border border-white/10 relative shadow-lg">
                               <img
                                 src={getImageUrl(photo.id)!}
                                 alt={photo.label}
-                                className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                               />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2">
+                                <Search className="w-4 h-4 text-white mx-auto mb-1" />
+                              </div>
                             </div>
-                            <div className="text-[8px] font-bold uppercase text-center opacity-50 tracking-tighter">{photo.label}</div>
+                            <div className="text-[9px] font-bold uppercase text-center text-emerald-100/70 tracking-widest">{photo.label}</div>
                           </div>
                         ))}
                       </div>
                     )}
 
-                    <div className="grid grid-cols-1 gap-4 pt-4 border-t border-white/10">
+                    <div className="bg-white/5 rounded-2xl p-5 space-y-4 border border-white/10 backdrop-blur-sm">
                       {formData.toMeetType === 'student' ? (
                         <>
-                          <div className="flex justify-between items-center"><span className="text-[10px] opacity-60 uppercase font-bold">Admission No</span><span className="text-xs font-black">{selectedProfile.regNo}</span></div>
-                          <div className="flex justify-between items-center"><span className="text-[10px] opacity-60 uppercase font-bold">Grade / Sec</span><span className="text-xs font-black">{selectedProfile.course} • {selectedProfile.section}</span></div>
-                          <div className="flex justify-between items-center"><span className="text-[10px] opacity-60 uppercase font-bold">Father Name</span><span className="text-xs font-black">{selectedProfile.fatherName}</span></div>
-                          <div className="flex justify-between items-center font-bold"><span className="text-[10px] opacity-60 uppercase">Contact</span><span className="text-xs">{selectedProfile.phone}</span></div>
+                          <div className="flex justify-between items-center"><span className="text-[10px] text-emerald-100/60 uppercase font-black tracking-wider">Admission No</span><span className="text-sm font-bold bg-white/10 px-2 py-0.5 rounded text-white">{selectedProfile.regNo}</span></div>
+                          <div className="flex justify-between items-center"><span className="text-[10px] text-emerald-100/60 uppercase font-black tracking-wider">Grade / Sec</span><span className="text-sm font-bold text-white">{selectedProfile.course} <span className="text-[#dbb13b]">•</span> {selectedProfile.section}</span></div>
+                          <div className="flex justify-between items-center"><span className="text-[10px] text-emerald-100/60 uppercase font-black tracking-wider">Father Name</span><span className="text-sm font-bold text-white text-right max-w-[120px] truncate">{selectedProfile.fatherName}</span></div>
+                          <div className="flex justify-between items-center border-t border-white/10 pt-4 mt-2"><span className="text-[10px] text-[#dbb13b] uppercase font-black tracking-wider flex items-center gap-1.5"><Phone className="w-3 h-3" /> Contact</span><span className="text-sm font-bold text-white">{selectedProfile.phone}</span></div>
                         </>
                       ) : (
                         <>
-                          <div className="flex justify-between items-center"><span className="text-[10px] opacity-60 uppercase font-bold">Employee ID</span><span className="text-xs font-black">{selectedProfile.employeeId}</span></div>
-                          <div className="flex justify-between items-center"><span className="text-[10px] opacity-60 uppercase font-bold">Department</span><span className="text-xs font-black">{selectedProfile.department}</span></div>
-                          <div className="flex justify-between items-center"><span className="text-[10px] opacity-60 uppercase font-bold">Designation</span><span className="text-xs font-black truncate max-w-[120px]">{selectedProfile.designation}</span></div>
-                          <div className="flex justify-between items-center font-bold"><span className="text-[10px] opacity-60 uppercase">Contact</span><span className="text-xs">{selectedProfile.mobile}</span></div>
+                          <div className="flex justify-between items-center"><span className="text-[10px] text-emerald-100/60 uppercase font-black tracking-wider">Employee ID</span><span className="text-sm font-bold bg-white/10 px-2 py-0.5 rounded text-white">{selectedProfile.employeeId}</span></div>
+                          <div className="flex justify-between items-center"><span className="text-[10px] text-emerald-100/60 uppercase font-black tracking-wider">Department</span><span className="text-sm font-bold text-white text-right">{selectedProfile.department}</span></div>
+                          <div className="flex justify-between items-center"><span className="text-[10px] text-emerald-100/60 uppercase font-black tracking-wider">Designation</span><span className="text-sm font-bold text-white text-right max-w-[140px] truncate">{selectedProfile.designation}</span></div>
+                          <div className="flex justify-between items-center border-t border-white/10 pt-4 mt-2"><span className="text-[10px] text-[#dbb13b] uppercase font-black tracking-wider flex items-center gap-1.5"><Phone className="w-3 h-3" /> Contact</span><span className="text-sm font-bold text-white">{selectedProfile.mobile}</span></div>
                         </>
                       )}
                     </div>
                   </div>
                 </Card>
               ) : (
-                <Card className="border-4 border-dashed border-slate-100 bg-transparent p-10 text-center flex flex-col items-center justify-center gap-4">
-                  <div className="bg-white p-4 rounded-full shadow-sm"><Users className="text-slate-200 w-10 h-10" /></div>
-                  <div className="text-slate-300 font-bold uppercase tracking-widest text-[10px]">Select a person to meet to preview profile</div>
+                <Card className="border-2 border-dashed border-slate-200 bg-slate-50/50 p-12 text-center flex flex-col items-center justify-center gap-6 rounded-3xl h-[400px]">
+                  <div className="bg-white p-6 rounded-full shadow-sm ring-1 ring-slate-100"><Users className="text-slate-300 w-12 h-12" /></div>
+                  <div className="space-y-2">
+                    <h4 className="text-slate-700 font-bold">No Profile Selected</h4>
+                    <p className="text-slate-400 font-medium text-xs max-w-[200px] leading-relaxed">Search and select a staff or student profile to view their details here.</p>
+                  </div>
                 </Card>
               )}
             </div>
@@ -561,39 +616,41 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
         </div>
 
         {/* Entry History */}
-        <div className="mt-12 space-y-6">
-          <div className="flex items-center gap-4">
-            <div className="h-px bg-slate-100 flex-1" />
-            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300">Entry History</h2>
-            <div className="h-px bg-slate-100 flex-1" />
+        <div className="mt-8 space-y-8">
+          <div className="flex items-center gap-6">
+            <h2 className="text-xl font-black text-slate-800 flex items-center gap-3">
+              <span className="w-2 h-8 bg-[#dbb13b] rounded-full inline-block"></span>
+              Recent Entries Log
+            </h2>
+            <div className="h-px bg-slate-200 flex-1" />
           </div>
-          <Card className="border-none shadow-xl shadow-slate-100 bg-white overflow-hidden">
-            <div className="max-h-[600px] overflow-y-auto">
+          <Card className="border-0 shadow-xl bg-white rounded-3xl overflow-hidden ring-1 ring-slate-100">
+            <div className="max-h-[500px] overflow-y-auto custom-scrollbar">
               <Table>
-                <TableHeader className="bg-slate-50 border-b border-slate-100 sticky top-0 z-10">
+                <TableHeader className="bg-slate-50/80 sticky top-0 z-10 backdrop-blur-sm border-b border-slate-100">
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="font-black text-[10px] uppercase text-slate-400 py-4">Visitor</TableHead>
-                    <TableHead className="font-black text-[10px] uppercase text-slate-400">Mobile</TableHead>
-                    <TableHead className="font-black text-[10px] uppercase text-slate-400">To Meet</TableHead>
-                    <TableHead className="font-black text-[10px] uppercase text-slate-400">Type</TableHead>
-                    <TableHead className="font-black text-[10px] uppercase text-slate-400">Time</TableHead>
+                    <TableHead className="font-bold text-[11px] uppercase tracking-wider text-slate-500 py-5 pl-8">Visitor Name</TableHead>
+                    <TableHead className="font-bold text-[11px] uppercase tracking-wider text-slate-500">Mobile</TableHead>
+                    <TableHead className="font-bold text-[11px] uppercase tracking-wider text-slate-500">Meeting With</TableHead>
+                    <TableHead className="font-bold text-[11px] uppercase tracking-wider text-slate-500">Category</TableHead>
+                    <TableHead className="font-bold text-[11px] uppercase tracking-wider text-slate-500 pr-8 text-right">Check-in Time</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {isLoadingVisitors ? (
-                    <TableRow><TableCell colSpan={5} className="py-20 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-slate-100" /></TableCell></TableRow>
+                    <TableRow><TableCell colSpan={5} className="py-24 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-[#0f4a25]" /></TableCell></TableRow>
                   ) : (
                     visitors.map((v) => (
-                      <TableRow key={v._id} className="hover:bg-slate-50 transition-colors">
-                        <TableCell className="font-black text-slate-700">{v.name}</TableCell>
-                        <TableCell className="text-slate-500 font-medium">{v.mobile}</TableCell>
-                        <TableCell className="font-black" style={{ color: PRIMARY_BLUE }}>{v.toMeet}</TableCell>
+                      <TableRow key={v._id} className="hover:bg-slate-50 transition-colors border-slate-50">
+                        <TableCell className="font-extrabold text-slate-700 pl-8 text-sm">{v.name}</TableCell>
+                        <TableCell className="text-slate-500 font-semibold text-sm">{v.mobile}</TableCell>
+                        <TableCell className="font-black text-[#0f4a25] text-sm flex items-center gap-2 mt-1.5"><User className="w-4 h-4 text-slate-400" /> {v.toMeet}</TableCell>
                         <TableCell>
-                          <span className={`text-[9px] font-black uppercase px-2 py-1 rounded-md ${v.toMeetType === 'student' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                          <span className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-lg tracking-wider border ${v.toMeetType === 'student' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-[#eaf1ec] text-[#0f4a25] border-[#0f4a25]/20'}`}>
                             {v.toMeetType}
                           </span>
                         </TableCell>
-                        <TableCell className="text-slate-400 font-bold text-[10px]">{new Date(v.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</TableCell>
+                        <TableCell className="text-slate-400 font-bold text-xs pr-8 text-right">{new Date(v.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</TableCell>
                       </TableRow>
                     ))
                   )}
