@@ -15,22 +15,16 @@ import {
 } from "./components/ui/table";
 import { 
   Search, 
-  RefreshCw, 
   Camera, 
   Upload, 
   X, 
-  Calendar as CalendarIcon,
-  Clock,
-  Lock,
-  Loader2,
-  ShieldCheck,
-  CheckCircle2,
-  Users,
-  GraduationCap,
-  Briefcase,
-  MapPin,
-  ChevronRight,
-  UserPlus
+  Lock, 
+  Loader2, 
+  CheckCircle2, 
+  Users, 
+  GraduationCap, 
+  Briefcase, 
+  ChevronRight
 } from "lucide-react";
 
 const ENTITY_ID = "64b77babcc3c21610787b060";
@@ -40,7 +34,7 @@ const PRIMARY_BLUE = "#1a365d"; // Darker shade of blue
 
 function LoginScreen({ onLoginSuccess }: { onLoginSuccess: (token: string) => void }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [, setError] = useState("");
 
   const handleAutoLogin = async () => {
     setIsLoading(true);
@@ -61,20 +55,26 @@ function LoginScreen({ onLoginSuccess }: { onLoginSuccess: (token: string) => vo
   return (
     <div className="min-h-screen bg-[#fafaf6] flex items-center justify-center p-4">
       <Card className="w-full max-w-sm border-none shadow-2xl bg-white animate-fade-in text-center p-4">
-        <CardHeader className="space-y-4 pb-8">
-          <div className={`mx-auto w-20 h-20 rounded-3xl flex items-center justify-center shadow-xl shadow-slate-200`} style={{ backgroundColor: PRIMARY_BLUE }}>
-            <ShieldCheck className="text-white w-10 h-10" />
+        <CardHeader className="space-y-6 pb-8">
+          <div className="flex justify-center items-center gap-4">
+            <div className="p-3 bg-white rounded-2xl shadow-lg border border-slate-50">
+              <img src="/wws.jpeg" alt="Wisdom Logo" className="w-16 h-16 object-contain" />
+            </div>
           </div>
           <div className="space-y-1">
             <CardTitle className="text-3xl font-black" style={{ color: PRIMARY_BLUE }}>Front Desk</CardTitle>
             <CardDescription className="text-slate-500 font-medium tracking-tight">Access Secure Dashboard</CardDescription>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-8">
           <Button onClick={handleAutoLogin} className="w-full h-14 text-white text-lg font-bold transition-all shadow-lg active:scale-95" style={{ backgroundColor: PRIMARY_BLUE }} disabled={isLoading}>
             {isLoading ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : "Get Started"}
           </Button>
-          <div className="text-[10px] uppercase tracking-[0.2em] text-slate-300 font-black">Authorized Personnel Only</div>
+          
+          <div className="flex flex-col items-center gap-3 pt-4 border-t border-slate-50">
+            <div className="text-[9px] uppercase tracking-[0.3em] text-slate-300 font-black">Powered & Secured By</div>
+            <img src="/od.png" alt="Okie Dokie" className="h-8 transition-all" />
+          </div>
         </CardContent>
       </Card>
     </div>
@@ -328,14 +328,25 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
       )}
 
       {/* Header */}
-      <div className="max-w-6xl mx-auto flex justify-between items-center mb-10">
-        <h1 className="text-3xl font-black tracking-tighter flex items-center gap-3" style={{ color: PRIMARY_BLUE }}>
-          <div className="p-2 rounded-xl" style={{ backgroundColor: PRIMARY_BLUE }}><UserPlus className="text-white w-6 h-6" /></div>
-          Front Desk <span className="text-slate-300 font-light">/ Visitor</span>
-        </h1>
-        <Button variant="ghost" onClick={onLogout} className="text-slate-400 hover:text-slate-900 font-bold text-xs uppercase tracking-widest transition-all">
-          <Lock className="w-3 h-3 mr-2" /> Logout
-        </Button>
+      <div className="max-w-6xl mx-auto flex justify-between items-end mb-10 pb-6 border-b border-slate-100">
+        <div className="flex items-center gap-6">
+          <div className="p-2 bg-white rounded-2xl shadow-sm border border-slate-50">
+            <img src="/wws.jpeg" alt="Wisdom Logo" className="w-14 h-14 object-contain" />
+          </div>
+          <h1 className="text-3xl font-black tracking-tighter" style={{ color: PRIMARY_BLUE }}>
+            Front Desk <span className="text-slate-300 font-light">/ Visitor</span>
+          </h1>
+        </div>
+        
+        <div className="flex items-center gap-8">
+          <div className="flex flex-col items-end gap-1 px-4 border-r border-slate-100">
+             <span className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-300">System Managed By</span>
+             <img src="/od.png" alt="Okie Dokie" className="h-8" />
+          </div>
+          <Button variant="ghost" onClick={onLogout} className="text-slate-400 hover:text-rose-500 font-bold text-xs uppercase tracking-widest transition-all">
+            <Lock className="w-3 h-3 mr-2" /> Logout
+          </Button>
+        </div>
       </div>
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 gap-8">
