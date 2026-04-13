@@ -27,7 +27,6 @@ import {
   Briefcase,
   ChevronRight,
   ArrowRight,
-  ShieldCheck,
   Building2,
   Building,
   Phone,
@@ -84,7 +83,7 @@ function LoginScreen({ onLoginSuccess }: { onLoginSuccess: (token: string) => vo
             {isLoading ? <Loader2 className="h-6 w-6 animate-spin mr-2" /> : <span className="flex items-center gap-2">Access Dashboard <ArrowRight className="w-5 h-5" /></span>}
           </Button>
 
-          
+
         </CardContent>
       </Card>
 
