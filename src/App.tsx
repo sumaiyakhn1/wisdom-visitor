@@ -5,25 +5,25 @@ import { Label } from "./components/ui/label";
 import { Button } from "./components/ui/button";
 import { RadioGroup, RadioGroupItem } from "./components/ui/radio-group";
 import { Textarea } from "./components/ui/textarea";
-import { 
-  Table, 
-  TableHeader, 
-  TableBody, 
-  TableHead, 
-  TableRow, 
-  TableCell 
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell
 } from "./components/ui/table";
-import { 
-  Search, 
-  Camera, 
-  Upload, 
-  X, 
-  Lock, 
-  Loader2, 
-  CheckCircle2, 
-  Users, 
-  GraduationCap, 
-  Briefcase, 
+import {
+  Search,
+  Camera,
+  Upload,
+  X,
+  Lock,
+  Loader2,
+  CheckCircle2,
+  Users,
+  GraduationCap,
+  Briefcase,
   ChevronRight
 } from "lucide-react";
 
@@ -48,7 +48,7 @@ function LoginScreen({ onLoginSuccess }: { onLoginSuccess: (token: string) => vo
       const data = await response.json();
       if (data.token) onLoginSuccess(data.token);
       else setError(data.message || "Login failed. Please try again.");
-    } catch (err) { setError("An error occurred during login. Please try again."); } 
+    } catch (err) { setError("An error occurred during login. Please try again."); }
     finally { setIsLoading(false); }
   };
 
@@ -70,7 +70,7 @@ function LoginScreen({ onLoginSuccess }: { onLoginSuccess: (token: string) => vo
           <Button onClick={handleAutoLogin} className="w-full h-14 text-white text-lg font-bold transition-all shadow-lg active:scale-95" style={{ backgroundColor: PRIMARY_BLUE }} disabled={isLoading}>
             {isLoading ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : "Get Started"}
           </Button>
-          
+
           <div className="flex flex-col items-center gap-3 pt-4 border-t border-slate-50">
             <div className="text-[9px] uppercase tracking-[0.3em] text-slate-300 font-black">Powered & Secured By</div>
             <img src="/od.png" alt="Okie Dokie" className="h-8 transition-all" />
@@ -78,6 +78,7 @@ function LoginScreen({ onLoginSuccess }: { onLoginSuccess: (token: string) => vo
         </CardContent>
       </Card>
     </div>
+
   );
 }
 
@@ -98,27 +99,27 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
   const [formData, setFormData] = useState({
     name: "", mobile: "", address: "", organizationName: "", toMeet: "", toMeetType: "employee", date: new Date().toISOString(), regarding: ""
   });
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
   const [visitors, setVisitors] = useState<any[]>([]);
   const [isLoadingVisitors, setIsLoadingVisitors] = useState(false);
-  
+
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isFetchingData, setIsFetchingData] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  
+
   const [visitorPhoto, setVisitorPhoto] = useState<string | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [selectedProfile, setSelectedProfile] = useState<any>(null);
   const [allStudents, setAllStudents] = useState<any[]>([]);
   const [allEmployees, setAllEmployees] = useState<any[]>([]);
   const [isRefreshingProfile, setIsRefreshingProfile] = useState(false);
-  
+
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const fetchVisitors = async () => {
@@ -129,7 +130,7 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
       });
       const data = await response.json();
       if (Array.isArray(data)) setVisitors(data.reverse());
-    } catch (err) { console.error("Failed to fetch visitors", err); } 
+    } catch (err) { console.error("Failed to fetch visitors", err); }
     finally { setIsLoadingVisitors(false); }
   };
 
@@ -204,7 +205,7 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
     // Set basic profile and API photo immediately so user sees it instantly
     const initialPhotos = { apiPhoto: extractFileId(profile.photo) };
     setSelectedProfile({ ...profile, photos: initialPhotos });
-    
+
     setFormData(prev => ({ ...prev, toMeet: profile.name }));
     setShowDropdown(false);
     setSearchQuery("");
@@ -215,7 +216,7 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
       try {
         const scholarId = profile.regNo?.trim();
         const response = await fetch(`https://student-image-finder.onrender.com/student/${encodeURIComponent(scholarId)}`);
-        
+
         if (response.status === 404) {
           const fallbackResponse = await fetch(`https://student-image-finder.onrender.com/student/${scholarId}`);
           if (fallbackResponse.ok) {
@@ -229,10 +230,10 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
           const liveData = await response.json();
           updateWithLiveData(liveData, profile);
         }
-      } catch (err) { 
-        console.error("Failed to sync live student data", err); 
-      } finally { 
-        setIsRefreshingProfile(false); 
+      } catch (err) {
+        console.error("Failed to sync live student data", err);
+      } finally {
+        setIsRefreshingProfile(false);
       }
     }
   };
@@ -291,14 +292,14 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
       if (data.status) {
         setSubmitStatus("success");
         setVisitorPhoto(null);
-        fetchVisitors(); 
+        fetchVisitors();
         setTimeout(() => {
           setFormData({ name: "", mobile: "", address: "", organizationName: "", toMeet: "", toMeetType: "employee", date: new Date().toISOString(), regarding: "" });
           setSelectedProfile(null);
           setSubmitStatus("idle");
         }, 2000);
       } else { setSubmitStatus("error"); }
-    } catch (err) { setSubmitStatus("error"); } 
+    } catch (err) { setSubmitStatus("error"); }
     finally { setIsSubmitting(false); }
   };
 
@@ -337,11 +338,11 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
             Front Desk <span className="text-slate-300 font-light">/ Visitor</span>
           </h1>
         </div>
-        
+
         <div className="flex items-center gap-8">
           <div className="flex flex-col items-end gap-1 px-4 border-r border-slate-100">
-             <span className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-300">System Managed By</span>
-             <img src="/od.png" alt="Okie Dokie" className="h-8" />
+            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-300">System Managed By</span>
+            <img src="/od.png" alt="Okie Dokie" className="h-8" />
           </div>
           <Button variant="ghost" onClick={onLogout} className="text-slate-400 hover:text-rose-500 font-bold text-xs uppercase tracking-widest transition-all">
             <Lock className="w-3 h-3 mr-2" /> Logout
@@ -359,12 +360,12 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
                 {/* Meeting Type Toggle */}
                 <div className="w-full md:w-auto shrink-0 space-y-3">
                   <Label className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: PRIMARY_BLUE }}>I am here to meet</Label>
-                  <RadioGroup 
-                    value={formData.toMeetType} 
-                    onValueChange={(val) => { setFormData(prev => ({ ...prev, toMeetType: val })); setSelectedProfile(null); setSearchQuery(""); }} 
+                  <RadioGroup
+                    value={formData.toMeetType}
+                    onValueChange={(val) => { setFormData(prev => ({ ...prev, toMeetType: val })); setSelectedProfile(null); setSearchQuery(""); }}
                     className="flex p-1 bg-slate-50 rounded-xl"
                   >
-                    {[ 'employee', 'student', 'other' ].map((type) => (
+                    {['employee', 'student', 'other'].map((type) => (
                       <div key={type} className="flex-1 min-w-[100px]">
                         <label className={`flex items-center justify-center h-10 rounded-lg cursor-pointer transition-all font-bold text-xs uppercase tracking-tight ${formData.toMeetType === type ? 'bg-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`} style={formData.toMeetType === type ? { color: PRIMARY_BLUE } : {}}>
                           <RadioGroupItem value={type} className="sr-only" />
@@ -381,14 +382,14 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
                     Search {formData.toMeetType} (Quick Select)
                   </Label>
                   <div className="relative group">
-                    <Input 
+                    <Input
                       placeholder={`Search by name or number...`}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="h-12 pl-12 pr-4 border-none bg-slate-50 rounded-xl focus-visible:ring-2 focus-visible:ring-[#1a365d]/20 transition-all font-medium text-slate-700" 
+                      className="h-12 pl-12 pr-4 border-none bg-slate-50 rounded-xl focus-visible:ring-2 focus-visible:ring-[#1a365d]/20 transition-all font-medium text-slate-700"
                     />
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-slate-900 transition-colors" />
-                    
+
                     {showDropdown && (
                       <Card className="absolute top-full left-0 right-0 mt-2 z-[100] border border-slate-50 shadow-2xl rounded-2xl overflow-hidden max-h-72 bg-white animate-in fade-in slide-in-from-top-2">
                         <div className="divide-y divide-slate-50">
@@ -476,7 +477,7 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="flex flex-col items-end gap-3">
                     {submitStatus === "success" && <div className="flex items-center gap-2 text-emerald-600 text-[10px] font-black uppercase tracking-wider animate-in fade-in scale-in-95"><CheckCircle2 className="w-3 h-3" /> Registration Successful</div>}
                     <Button onClick={handleAddVisitor} className="text-white px-12 h-14 rounded-xl font-black uppercase tracking-widest transition-all shadow-xl active:scale-95" style={{ backgroundColor: PRIMARY_BLUE }} disabled={isSubmitting || submitStatus === "success"}>
@@ -490,65 +491,65 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
             {/* Selection Details Sidebar */}
             <div className="space-y-6">
               {selectedProfile ? (
-                 <Card className="border-none shadow-2xl overflow-hidden animate-in slide-in-from-right-4 duration-500 text-white" style={{ backgroundColor: PRIMARY_BLUE }}>
-                    <div className="p-8 space-y-6">
-                      <div className="flex justify-between items-start">
-                        <div className="bg-white/10 p-2 rounded-lg relative">
-                          {formData.toMeetType === 'student' ? <GraduationCap className="w-6 h-6" /> : <Briefcase className="w-6 h-6" />}
-                          {isRefreshingProfile && <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-lg"><Loader2 className="w-3 h-3 animate-spin" /></div>}
-                        </div>
-                        <Button variant="ghost" size="icon" onClick={() => { setSelectedProfile(null); setFormData(prev => ({ ...prev, toMeet: "" })); }} className="h-8 w-8 text-white/50 hover:text-white hover:bg-white/10">
-                          <X className="w-4 h-4" />
-                        </Button>
+                <Card className="border-none shadow-2xl overflow-hidden animate-in slide-in-from-right-4 duration-500 text-white" style={{ backgroundColor: PRIMARY_BLUE }}>
+                  <div className="p-8 space-y-6">
+                    <div className="flex justify-between items-start">
+                      <div className="bg-white/10 p-2 rounded-lg relative">
+                        {formData.toMeetType === 'student' ? <GraduationCap className="w-6 h-6" /> : <Briefcase className="w-6 h-6" />}
+                        {isRefreshingProfile && <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-lg"><Loader2 className="w-3 h-3 animate-spin" /></div>}
                       </div>
-                      
-                      <div className="space-y-1">
-                        <div className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">Meeting With</div>
-                        <h3 className="text-2xl font-black tracking-tight leading-tight">{selectedProfile.name}</h3>
-                      </div>
-
-                      {/* Photo Gallery for Students */}
-                      {formData.toMeetType === 'student' && selectedProfile.photos && (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-2 py-4">
-                          {[
-                            { id: selectedProfile.photos.apiPhoto, label: 'Profile' },
-                            { id: selectedProfile.photos.student, label: 'Student' },
-                            { id: selectedProfile.photos.father, label: 'Father' },
-                            { id: selectedProfile.photos.mother, label: 'Mother' }
-                          ].filter(p => p.id).map((photo, idx) => (
-                            <div key={idx} className="space-y-1.5 translate-y-0 hover:-translate-y-1 transition-transform">
-                              <div className="aspect-[3/4] rounded-lg bg-white/10 overflow-hidden border border-white/5 relative group cursor-pointer shadow-lg">
-                                <img 
-                                  src={getImageUrl(photo.id)!} 
-                                  alt={photo.label} 
-                                  className="w-full h-full object-cover transition-transform group-hover:scale-110" 
-                                />
-                              </div>
-                              <div className="text-[8px] font-bold uppercase text-center opacity-50 tracking-tighter">{photo.label}</div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      <div className="grid grid-cols-1 gap-4 pt-4 border-t border-white/10">
-                        {formData.toMeetType === 'student' ? (
-                          <>
-                            <div className="flex justify-between items-center"><span className="text-[10px] opacity-60 uppercase font-bold">Admission No</span><span className="text-xs font-black">{selectedProfile.regNo}</span></div>
-                            <div className="flex justify-between items-center"><span className="text-[10px] opacity-60 uppercase font-bold">Grade / Sec</span><span className="text-xs font-black">{selectedProfile.course} • {selectedProfile.section}</span></div>
-                            <div className="flex justify-between items-center"><span className="text-[10px] opacity-60 uppercase font-bold">Father Name</span><span className="text-xs font-black">{selectedProfile.fatherName}</span></div>
-                            <div className="flex justify-between items-center font-bold"><span className="text-[10px] opacity-60 uppercase">Contact</span><span className="text-xs">{selectedProfile.phone}</span></div>
-                          </>
-                        ) : (
-                          <>
-                            <div className="flex justify-between items-center"><span className="text-[10px] opacity-60 uppercase font-bold">Employee ID</span><span className="text-xs font-black">{selectedProfile.employeeId}</span></div>
-                            <div className="flex justify-between items-center"><span className="text-[10px] opacity-60 uppercase font-bold">Department</span><span className="text-xs font-black">{selectedProfile.department}</span></div>
-                            <div className="flex justify-between items-center"><span className="text-[10px] opacity-60 uppercase font-bold">Designation</span><span className="text-xs font-black truncate max-w-[120px]">{selectedProfile.designation}</span></div>
-                            <div className="flex justify-between items-center font-bold"><span className="text-[10px] opacity-60 uppercase">Contact</span><span className="text-xs">{selectedProfile.mobile}</span></div>
-                          </>
-                        )}
-                      </div>
+                      <Button variant="ghost" size="icon" onClick={() => { setSelectedProfile(null); setFormData(prev => ({ ...prev, toMeet: "" })); }} className="h-8 w-8 text-white/50 hover:text-white hover:bg-white/10">
+                        <X className="w-4 h-4" />
+                      </Button>
                     </div>
-                 </Card>
+
+                    <div className="space-y-1">
+                      <div className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">Meeting With</div>
+                      <h3 className="text-2xl font-black tracking-tight leading-tight">{selectedProfile.name}</h3>
+                    </div>
+
+                    {/* Photo Gallery for Students */}
+                    {formData.toMeetType === 'student' && selectedProfile.photos && (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-2 py-4">
+                        {[
+                          { id: selectedProfile.photos.apiPhoto, label: 'Profile' },
+                          { id: selectedProfile.photos.student, label: 'Student' },
+                          { id: selectedProfile.photos.father, label: 'Father' },
+                          { id: selectedProfile.photos.mother, label: 'Mother' }
+                        ].filter(p => p.id).map((photo, idx) => (
+                          <div key={idx} className="space-y-1.5 translate-y-0 hover:-translate-y-1 transition-transform">
+                            <div className="aspect-[3/4] rounded-lg bg-white/10 overflow-hidden border border-white/5 relative group cursor-pointer shadow-lg">
+                              <img
+                                src={getImageUrl(photo.id)!}
+                                alt={photo.label}
+                                className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                              />
+                            </div>
+                            <div className="text-[8px] font-bold uppercase text-center opacity-50 tracking-tighter">{photo.label}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 gap-4 pt-4 border-t border-white/10">
+                      {formData.toMeetType === 'student' ? (
+                        <>
+                          <div className="flex justify-between items-center"><span className="text-[10px] opacity-60 uppercase font-bold">Admission No</span><span className="text-xs font-black">{selectedProfile.regNo}</span></div>
+                          <div className="flex justify-between items-center"><span className="text-[10px] opacity-60 uppercase font-bold">Grade / Sec</span><span className="text-xs font-black">{selectedProfile.course} • {selectedProfile.section}</span></div>
+                          <div className="flex justify-between items-center"><span className="text-[10px] opacity-60 uppercase font-bold">Father Name</span><span className="text-xs font-black">{selectedProfile.fatherName}</span></div>
+                          <div className="flex justify-between items-center font-bold"><span className="text-[10px] opacity-60 uppercase">Contact</span><span className="text-xs">{selectedProfile.phone}</span></div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex justify-between items-center"><span className="text-[10px] opacity-60 uppercase font-bold">Employee ID</span><span className="text-xs font-black">{selectedProfile.employeeId}</span></div>
+                          <div className="flex justify-between items-center"><span className="text-[10px] opacity-60 uppercase font-bold">Department</span><span className="text-xs font-black">{selectedProfile.department}</span></div>
+                          <div className="flex justify-between items-center"><span className="text-[10px] opacity-60 uppercase font-bold">Designation</span><span className="text-xs font-black truncate max-w-[120px]">{selectedProfile.designation}</span></div>
+                          <div className="flex justify-between items-center font-bold"><span className="text-[10px] opacity-60 uppercase">Contact</span><span className="text-xs">{selectedProfile.mobile}</span></div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </Card>
               ) : (
                 <Card className="border-4 border-dashed border-slate-100 bg-transparent p-10 text-center flex flex-col items-center justify-center gap-4">
                   <div className="bg-white p-4 rounded-full shadow-sm"><Users className="text-slate-200 w-10 h-10" /></div>
@@ -562,9 +563,9 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
         {/* Entry History */}
         <div className="mt-12 space-y-6">
           <div className="flex items-center gap-4">
-             <div className="h-px bg-slate-100 flex-1" />
-             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300">Entry History</h2>
-             <div className="h-px bg-slate-100 flex-1" />
+            <div className="h-px bg-slate-100 flex-1" />
+            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300">Entry History</h2>
+            <div className="h-px bg-slate-100 flex-1" />
           </div>
           <Card className="border-none shadow-xl shadow-slate-100 bg-white overflow-hidden">
             <div className="max-h-[600px] overflow-y-auto">
