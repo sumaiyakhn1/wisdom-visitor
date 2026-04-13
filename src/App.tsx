@@ -69,13 +69,14 @@ function LoginScreen({ onLoginSuccess }: { onLoginSuccess: (token: string) => vo
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-1 bg-[#dbb13b] rounded-b-full"></div>
         <CardHeader className="space-y-6 pb-10">
           <div className="flex justify-center items-center">
-            <div className="p-4 bg-white rounded-full shadow-2xl border border-slate-100 ring-8 ring-slate-100/50 -mt-20 flex items-center justify-center">
-              <img src="/wws.jpeg" alt="Wisdom Logo" className="w-24 h-24 object-contain rounded-full" />
+            <div className="p-3 bg-white rounded-2xl shadow-2xl border border-slate-100 ring-8 ring-slate-100/50 -mt-20 flex items-center justify-center">
+              <img src="/wws.jpeg" alt="Wisdom Logo" className="w-16 h-16 object-contain" />
             </div>
           </div>
           <div className="space-y-3">
             <CardTitle className="text-4xl font-extrabold tracking-tight text-[#0f4a25]">Front Desk</CardTitle>
             <CardDescription className="text-slate-500 font-medium text-lg leading-snug">Secure Campus & Visitor<br />Management System</CardDescription>
+            <p className="text-sm font-medium text-[#0f4a25]">Developed by Okie Dokie</p>
           </div>
         </CardHeader>
         <CardContent className="space-y-8">
@@ -83,12 +84,7 @@ function LoginScreen({ onLoginSuccess }: { onLoginSuccess: (token: string) => vo
             {isLoading ? <Loader2 className="h-6 w-6 animate-spin mr-2" /> : <span className="flex items-center gap-2">Access Dashboard <ArrowRight className="w-5 h-5" /></span>}
           </Button>
 
-          <div className="flex flex-col items-center gap-3 pt-8 border-t border-slate-100">
-            <div className="text-[10px] uppercase tracking-widest text-slate-400 font-bold flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-[#dbb13b]" /> System Managed By
-            </div>
-            <img src="/od.png" alt="Okie Dokie" className="h-8 transition-all grayscale hover:grayscale-0 opacity-60 hover:opacity-100" />
-          </div>
+          
         </CardContent>
       </Card>
 
@@ -350,26 +346,21 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
 
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
           <div className="flex items-center gap-6">
-            <div className="p-2 border-4 border-white/20 bg-white rounded-full shadow-2xl backdrop-blur-sm">
-              <img src="/wws.jpeg" alt="Wisdom Logo" className="w-16 h-16 object-contain rounded-full" />
+            <div className="p-2 border-4 border-white/20 bg-white rounded-2xl shadow-2xl backdrop-blur-sm">
+              <img src="/wws.jpeg" alt="Wisdom Logo" className="w-16 h-16 object-contain" />
             </div>
             <div className="text-white">
               <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight flex items-center gap-3">
                 Front Desk <span className="text-[#dbb13b] text-2xl">/</span> <span className="font-light text-emerald-100">Visitor</span>
               </h1>
               <p className="text-emerald-200/80 text-sm font-medium tracking-wide mt-1">Wisdom World School - Kurukshetra</p>
+              <p className="text-sm font-medium text-white mt-1">Developed by Okie Dokie</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-6 bg-black/20 backdrop-blur-xl px-5 py-3 rounded-2xl border border-white/10 shadow-inner">
-            <div className="flex flex-col items-end gap-1 px-4 border-r border-white/10">
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#dbb13b]">Powered By</span>
-              <img src="/od.png" alt="Okie Dokie" className="h-5 brightness-200 contrast-200" />
-            </div>
-            <Button variant="ghost" onClick={onLogout} className="text-white hover:text-white hover:bg-rose-500/80 font-bold text-xs uppercase tracking-widest transition-all rounded-xl h-10 px-4">
-              <Lock className="w-3 h-3 mr-2" /> Logout
-            </Button>
-          </div>
+          <Button variant="ghost" onClick={onLogout} className="text-white hover:text-white hover:bg-rose-500/80 font-bold text-xs uppercase tracking-widest transition-all rounded-xl h-10 px-5 bg-black/20 backdrop-blur-xl border border-white/10 shadow-inner">
+            <Lock className="w-4 h-4 mr-2 text-[#dbb13b]" /> Logout
+          </Button>
         </div>
       </div>
 
@@ -474,28 +465,28 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
                   <div className="space-y-3">
-                    <Label className="text-[11px] font-black uppercase text-slate-400 tracking-wider">Visitor Name (Outdoor Person)</Label>
-                    <Input id="name" placeholder="E.g. John Doe" value={formData.name} onChange={handleInputChange} className="h-14 border-x-0 border-t-0 border-b-2 border-slate-200 rounded-none px-2 bg-transparent focus-visible:ring-0 focus-visible:border-[#0f4a25] font-bold text-slate-800 text-base shadow-none transition-all" />
+                    <Label className="text-[11px] font-black uppercase text-[#0f4a25] tracking-wider">Visitor Name (Outdoor Person)</Label>
+                    <Input id="name" placeholder="E.g. John Doe" value={formData.name} onChange={handleInputChange} className="h-14 border-2 border-slate-200 rounded-xl px-4 bg-slate-50 focus-visible:bg-white focus-visible:border-[#0f4a25] focus-visible:ring-4 focus-visible:ring-[#0f4a25]/10 font-bold text-slate-800 text-base shadow-sm transition-all outline-none" />
                   </div>
                   <div className="space-y-3">
-                    <Label className="text-[11px] font-black uppercase text-slate-400 tracking-wider">Mobile Number</Label>
-                    <Input id="mobile" placeholder="E.g. +91 9876543210" value={formData.mobile} onChange={handleInputChange} className="h-14 border-x-0 border-t-0 border-b-2 border-slate-200 rounded-none px-2 bg-transparent focus-visible:ring-0 focus-visible:border-[#0f4a25] font-bold text-slate-800 text-base shadow-none transition-all" />
+                    <Label className="text-[11px] font-black uppercase text-[#0f4a25] tracking-wider">Mobile Number</Label>
+                    <Input id="mobile" placeholder="E.g. +91 9876543210" value={formData.mobile} onChange={handleInputChange} className="h-14 border-2 border-slate-200 rounded-xl px-4 bg-slate-50 focus-visible:bg-white focus-visible:border-[#0f4a25] focus-visible:ring-4 focus-visible:ring-[#0f4a25]/10 font-bold text-slate-800 text-base shadow-sm transition-all outline-none" />
                   </div>
                   <div className="space-y-3">
-                    <Label className="text-[11px] font-black uppercase text-slate-400 tracking-wider">Organization / Company</Label>
-                    <Input id="organizationName" placeholder="E.g. Acme Corp" value={formData.organizationName} onChange={handleInputChange} className="h-14 border-x-0 border-t-0 border-b-2 border-slate-200 rounded-none px-2 bg-transparent focus-visible:ring-0 focus-visible:border-[#0f4a25] font-bold text-slate-800 text-base shadow-none transition-all" />
+                    <Label className="text-[11px] font-black uppercase text-[#0f4a25] tracking-wider">Organization / Company</Label>
+                    <Input id="organizationName" placeholder="E.g. Acme Corp" value={formData.organizationName} onChange={handleInputChange} className="h-14 border-2 border-slate-200 rounded-xl px-4 bg-slate-50 focus-visible:bg-white focus-visible:border-[#0f4a25] focus-visible:ring-4 focus-visible:ring-[#0f4a25]/10 font-bold text-slate-800 text-base shadow-sm transition-all outline-none" />
                   </div>
                   <div className="space-y-3">
                     <Label className="text-[11px] font-black uppercase text-[#0f4a25] tracking-wider bg-[#eaf1ec] px-2 py-1 rounded inline-block">Person To Meet</Label>
-                    <Input id="toMeet" placeholder="Select from search above..." value={formData.toMeet} onChange={handleInputChange} className="h-14 border-x-0 border-t-0 border-b-2 border-[#0f4a25]/30 rounded-none px-2 bg-transparent focus-visible:ring-0 focus-visible:border-[#0f4a25] font-black text-[#0f4a25] text-lg shadow-none transition-all placeholder:font-semibold placeholder:text-[#0f4a25]/40" />
+                    <Input id="toMeet" placeholder="Select from search above..." value={formData.toMeet} onChange={handleInputChange} className="h-14 border-2 border-[#0f4a25]/30 rounded-xl px-4 bg-[#eaf1ec]/50 focus-visible:bg-white focus-visible:border-[#0f4a25] focus-visible:ring-4 focus-visible:ring-[#0f4a25]/10 font-black text-[#0f4a25] text-lg shadow-sm transition-all placeholder:font-semibold placeholder:text-[#0f4a25]/40 outline-none" />
                   </div>
                   <div className="space-y-3 md:col-span-2 mt-2">
-                    <Label className="text-[11px] font-black uppercase text-slate-400 tracking-wider">Address / Location</Label>
-                    <Input id="address" placeholder="Full residential or office address" value={formData.address} onChange={handleInputChange} className="h-14 border-x-0 border-t-0 border-b-2 border-slate-200 rounded-none px-2 bg-transparent focus-visible:ring-0 focus-visible:border-[#0f4a25] font-bold text-slate-800 text-base shadow-none transition-all" />
+                    <Label className="text-[11px] font-black uppercase text-[#0f4a25] tracking-wider">Address / Location</Label>
+                    <Input id="address" placeholder="Full residential or office address" value={formData.address} onChange={handleInputChange} className="h-14 border-2 border-slate-200 rounded-xl px-4 bg-slate-50 focus-visible:bg-white focus-visible:border-[#0f4a25] focus-visible:ring-4 focus-visible:ring-[#0f4a25]/10 font-bold text-slate-800 text-base shadow-sm transition-all outline-none" />
                   </div>
                   <div className="space-y-3 md:col-span-2 mt-2">
-                    <Label className="text-[11px] font-black uppercase text-slate-400 tracking-wider">Purpose of Visit (Regarding)</Label>
-                    <Textarea id="regarding" placeholder="Briefly describe the reason for this visit..." value={formData.regarding} onChange={handleInputChange} className="min-h-[80px] border-x-0 border-t-0 border-b-2 border-slate-200 rounded-none px-2 py-4 bg-transparent focus-visible:ring-0 focus-visible:border-[#0f4a25] font-semibold text-slate-700 text-base shadow-none resize-none transition-all" />
+                    <Label className="text-[11px] font-black uppercase text-[#0f4a25] tracking-wider">Purpose of Visit (Regarding)</Label>
+                    <Textarea id="regarding" placeholder="Briefly describe the reason for this visit..." value={formData.regarding} onChange={handleInputChange} className="min-h-[100px] border-2 border-slate-200 rounded-xl px-4 py-4 bg-slate-50 focus-visible:bg-white focus-visible:border-[#0f4a25] focus-visible:ring-4 focus-visible:ring-[#0f4a25]/10 font-semibold text-slate-800 text-base shadow-sm resize-none transition-all outline-none" />
                   </div>
                 </div>
 
