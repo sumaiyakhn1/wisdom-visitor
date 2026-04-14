@@ -97,14 +97,27 @@ function LoginScreen({ onLoginSuccess }: { onLoginSuccess: (token: string) => vo
 // Helper to extract Google Drive File ID
 const extractFileId = (url: string | null | undefined) => {
   if (!url || typeof url !== 'string') return null;
-  const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-  return match ? match[1] : null;
+  
+  // 1. Google Drive URLs (/d/ID or ?id=ID)
+  const driveMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (driveMatch) return driveMatch[1];
+  
+  // 2. Identity proxy URLs (extract ID from segment after /image-proxy/)
+  if (url.includes('image-proxy/')) {
+    return url.split('image-proxy/').pop()?.split(/[?#]/)[0] || null;
+  }
+  
+  // 3. Full URL but no Drive/Proxy markers - could be a direct ID if short and no special chars
+  if (url.length > 20 && !url.includes('/') && !url.includes('.')) return url;
+  
+  return null;
 };
 
-// Map Drive ID to Proxy URL (Using the verified render proxy for image streaming)
+// Map Drive ID to high-speed CDN URL (lh3 is significantly faster than the proxy)
 const getImageUrl = (fileId: string | null) => {
   if (!fileId) return null;
-  return `https://student-image-finder.onrender.com/image-proxy/${fileId}`;
+  // Using Google's direct CDN endpoint with a 400px size limit for instant loading
+  return `https://lh3.googleusercontent.com/d/${fileId}=s400`;
 };
 
 function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => void }) {
@@ -148,6 +161,19 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
 
   const fetchAllStudents = async () => {
     if (allStudents.length > 0) return;
+    
+    // Check localStorage cache first
+    const cached = localStorage.getItem(`students_${ENTITY_ID}`);
+    if (cached) {
+      try {
+        const { data, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < 3600000) { // 1 hour cache
+          setAllStudents(data);
+          return;
+        }
+      } catch (e) { localStorage.removeItem(`students_${ENTITY_ID}`); }
+    }
+
     setIsFetchingData(true);
     try {
       const response = await fetch("https://others-api.odpay.in/api/list/student", {
@@ -156,19 +182,38 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
         body: JSON.stringify({ entity: ENTITY_ID, session: SESSION }),
       });
       const result = await response.json();
-      setAllStudents(result.data || []);
+      const students = result.data || [];
+      setAllStudents(students);
+      // Cache the result
+      localStorage.setItem(`students_${ENTITY_ID}`, JSON.stringify({ data: students, timestamp: Date.now() }));
     } finally { setIsFetchingData(false); }
   };
 
   const fetchAllEmployees = async () => {
     if (allEmployees.length > 0) return;
+
+    // Check localStorage cache first
+    const cached = localStorage.getItem(`employees_${ENTITY_ID}`);
+    if (cached) {
+      try {
+        const { data, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < 3600000) {
+          setAllEmployees(data);
+          return;
+        }
+      } catch (e) { localStorage.removeItem(`employees_${ENTITY_ID}`); }
+    }
+
     setIsFetchingData(true);
     try {
       const response = await fetch(`https://others-api.odpay.in/api/list/Employee?entity=${ENTITY_ID}&showInactive=true`, {
         headers: { "Authorization": token },
       });
       const result = await response.json();
-      setAllEmployees(Array.isArray(result) ? result : []);
+      const employees = Array.isArray(result) ? result : [];
+      setAllEmployees(employees);
+      // Cache the result
+      localStorage.setItem(`employees_${ENTITY_ID}`, JSON.stringify({ data: employees, timestamp: Date.now() }));
     } finally { setIsFetchingData(false); }
   };
 
@@ -198,22 +243,57 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
     setFormData(prev => ({ ...prev, [id]: value }));
   };
 
-  const updateWithLiveData = (liveData: any, profile: any) => {
+  const updateWithLiveData = (liveData: any, targetRegNo: string, profile: any) => {
     if (!liveData) return;
-    setSelectedProfile((prev: any) => ({
-      ...prev,
-      ...liveData,
-      photos: {
-        apiPhoto: extractFileId(profile.photo),
-        student: extractFileId(liveData["Student's Photograph"] || liveData.studentPhoto || liveData.studentPhotograph),
-        father: extractFileId(liveData["Father's Photograph"] || liveData.fatherPhoto || liveData.fatherPhotograph),
-        mother: extractFileId(liveData["Mother's Photograph"] || liveData.motherPhoto || liveData.motherPhotograph),
-      }
-    }));
+    
+    setSelectedProfile((prev: any) => {
+      // Guard: Only update if the user hasn't switched to a different student in the meantime
+      if (prev?.regNo !== targetRegNo) return prev;
+
+      const findPhoto = (keyBase: string, profileKey: string) => {
+        return extractFileId(
+          liveData[`${keyBase}'s Photograph`] || 
+          liveData[`${keyBase}'s Photo`] || 
+          liveData[`${keyBase}Photo`] || 
+          liveData[`${keyBase}Photograph`] ||
+          profile[`${keyBase}'s Photograph`] ||
+          profile[`${keyBase}'s Photo`] ||
+          profile[`${keyBase}Photo`] ||
+          profile[profileKey]
+        );
+      };
+
+      return {
+        ...prev,
+        ...liveData,
+        photos: {
+          apiPhoto: extractFileId(profile.photo),
+          student: extractFileId(liveData["Student's Photograph"] || liveData.studentPhoto || liveData.studentPhotograph || profile["Student's Photograph"] || profile.studentPhoto || profile.photo),
+          father: findPhoto("Father", "fatherPhoto"),
+          mother: findPhoto("Mother", "motherPhoto"),
+          guardian: findPhoto("Guardian", "guardianPhoto"),
+          grandfather: findPhoto("Grandfather", "grandfatherPhoto"),
+          grandmother: findPhoto("Grandmother", "grandmotherPhoto"),
+          sibling1: extractFileId(liveData["Sibling-1 Photograph (Real brother/sister)"] || liveData.sibling1Photo || profile["Sibling-1 Photograph (Real brother/sister)"] || profile.sibling1Photo),
+          sibling2: extractFileId(liveData["Sibling-2 Photograph (Real brother/sister)"] || liveData.sibling2Photo || profile["Sibling-2 Photograph (Real brother/sister)"] || profile.sibling2Photo),
+        }
+      };
+    });
   };
 
   const selectProfile = async (profile: any) => {
-    const initialPhotos = { apiPhoto: extractFileId(profile.photo) };
+    // Immediately extract all photos present in the student list data
+    const initialPhotos = {
+      apiPhoto: extractFileId(profile.photo),
+      student: extractFileId(profile["Student's Photograph"] || profile.studentPhoto || profile.studentPhotograph || profile.photo),
+      father: extractFileId(profile["Father's Photograph"] || profile.fatherPhoto || profile.fatherPhotograph),
+      mother: extractFileId(profile["Mother's Photograph"] || profile.motherPhoto || profile.motherPhotograph),
+      guardian: extractFileId(profile["Guardian's Photo"] || profile.guardianPhoto),
+      grandfather: extractFileId(profile["Grandfather's Photograph"] || profile.grandfatherPhoto),
+      grandmother: extractFileId(profile["Grandmother's Photograph"] || profile.grandmotherPhoto),
+      sibling1: extractFileId(profile["Sibling-1 Photograph (Real brother/sister)"] || profile.sibling1Photo),
+      sibling2: extractFileId(profile["Sibling-2 Photograph (Real brother/sister)"] || profile.sibling2Photo),
+    };
     setSelectedProfile({ ...profile, photos: initialPhotos });
 
     setFormData(prev => ({ ...prev, toMeet: profile.name }));
@@ -222,22 +302,16 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
 
     if (formData.toMeetType === "student") {
       setIsRefreshingProfile(true);
+      const targetRegNo = profile.regNo;
       try {
-        const scholarId = profile.regNo?.trim();
-        const response = await fetch(`https://student-image-finder.onrender.com/student/${encodeURIComponent(scholarId)}`);
+        const fullScholarId = profile.regNo?.trim();
+        const scholarId = fullScholarId?.split('/')[0]; // Send only the part before the slash (e.g., 3947)
 
-        if (response.status === 404) {
-          const fallbackResponse = await fetch(`https://student-image-finder.onrender.com/student/${scholarId}`);
-          if (fallbackResponse.ok) {
-            const liveData = await fallbackResponse.json();
-            updateWithLiveData(liveData, profile);
-            return;
-          }
-        }
+        const response = await fetch(`https://student-image-finder.onrender.com/student/${scholarId}`);
 
         if (response.ok) {
           const liveData = await response.json();
-          updateWithLiveData(liveData, profile);
+          updateWithLiveData(liveData, targetRegNo, profile);
         }
       } catch (err) {
         console.error("Failed to sync live student data", err);
@@ -425,8 +499,12 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
                           ) : (
                             searchResults.map((profile) => (
                               <button key={profile._id} onClick={() => selectProfile(profile)} className="w-full px-6 py-4 flex items-center gap-5 text-left hover:bg-[#eaf1ec] transition-colors group">
-                                <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center font-black text-lg border border-slate-200 uppercase text-[#0f4a25] group-hover:bg-white group-hover:shadow-sm transition-all">
-                                  {profile.name?.[0]}
+                                <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center font-black text-lg border border-slate-200 uppercase text-[#0f4a25] group-hover:bg-white group-hover:shadow-sm transition-all overflow-hidden">
+                                  {profile.photo ? (
+                                    <img src={getImageUrl(extractFileId(profile.photo))!} alt="" className="w-full h-full object-cover" />
+                                  ) : (
+                                    profile.name?.[0]
+                                  )}
                                 </div>
                                 <div className="flex-1 overflow-hidden">
                                   <div className="text-base font-black text-slate-800 truncate group-hover:text-[#0f4a25] transition-colors">{profile.name}</div>
@@ -550,26 +628,40 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
                     {/* Photo Gallery for Students */}
                     {formData.toMeetType === 'student' && selectedProfile.photos && (
                       <div className="grid grid-cols-2 gap-3 py-2">
-                        {[
-                          { id: selectedProfile.photos.apiPhoto, label: 'Profile' },
-                          { id: selectedProfile.photos.student, label: 'Student' },
-                          { id: selectedProfile.photos.father, label: 'Father' },
-                          { id: selectedProfile.photos.mother, label: 'Mother' }
-                        ].filter(p => p.id).map((photo, idx) => (
-                          <div key={idx} className="space-y-2 group cursor-pointer">
-                            <div className="aspect-[3/4] rounded-xl bg-black/20 overflow-hidden border border-white/10 relative shadow-lg">
-                              <img
-                                src={getImageUrl(photo.id)!}
-                                alt={photo.label}
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2">
-                                <Search className="w-4 h-4 text-white mx-auto mb-1" />
+                        {(() => {
+                          const seen = new Set();
+                          const photos = [
+                            { id: selectedProfile.photos.apiPhoto, label: 'Profile' },
+                            { id: selectedProfile.photos.student, label: 'Student' },
+                            { id: selectedProfile.photos.father, label: 'Father' },
+                            { id: selectedProfile.photos.mother, label: 'Mother' },
+                            { id: selectedProfile.photos.guardian, label: 'Guardian' },
+                            { id: selectedProfile.photos.grandfather, label: 'Grandpa' },
+                            { id: selectedProfile.photos.grandmother, label: 'Grandma' },
+                            { id: selectedProfile.photos.sibling1, label: 'Sibling 1' },
+                            { id: selectedProfile.photos.sibling2, label: 'Sibling 2' }
+                          ].filter(p => {
+                            if (!p.id || seen.has(p.id)) return false;
+                            seen.add(p.id);
+                            return true;
+                          });
+
+                          return photos.map((photo, idx) => (
+                            <div key={idx} className="space-y-2 group cursor-pointer">
+                              <div className="aspect-[3/4] rounded-xl bg-black/20 overflow-hidden border border-white/10 relative shadow-lg">
+                                <img
+                                  src={getImageUrl(photo.id)!}
+                                  alt={photo.label}
+                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2">
+                                  <Search className="w-4 h-4 text-white mx-auto mb-1" />
+                                </div>
                               </div>
+                              <div className="text-[9px] font-bold uppercase text-center text-emerald-100/70 tracking-widest">{photo.label}</div>
                             </div>
-                            <div className="text-[9px] font-bold uppercase text-center text-emerald-100/70 tracking-widest">{photo.label}</div>
-                          </div>
-                        ))}
+                          ));
+                        })()}
                       </div>
                     )}
 
