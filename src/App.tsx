@@ -145,6 +145,14 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
   const [allEmployees, setAllEmployees] = useState<any[]>([]);
   const [isRefreshingProfile, setIsRefreshingProfile] = useState(false);
 
+  // OTP Verification States
+  const [isOtpPopupOpen, setIsOtpPopupOpen] = useState(false);
+  const [otpValue, setOtpValue] = useState("");
+  const [isOtpSending, setIsOtpSending] = useState(false);
+  const [isOtpVerifying, setIsOtpVerifying] = useState(false);
+  const [otpStatus, setOtpStatus] = useState<"idle" | "verified" | "not_verified">("idle");
+  const [otpError, setOtpError] = useState("");
+
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const fetchVisitors = async () => {
@@ -240,6 +248,9 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
+    if (id === "mobile") {
+      setOtpStatus("idle");
+    }
     setFormData(prev => ({ ...prev, [id]: value }));
   };
 
@@ -386,6 +397,55 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
     finally { setIsSubmitting(false); }
   };
 
+  const handleSendOtp = async () => {
+    if (!formData.mobile) return;
+    setIsOtpSending(true);
+    setOtpError("");
+    try {
+      const res = await fetch(`https://admission-api.odpay.in/api/sendLogin/otp?mobile=${formData.mobile}`);
+      const data = await res.json();
+      if (data.type === "error" || data.status === false || data.success === false) {
+        setOtpError(data.message || "Failed to send OTP");
+      }
+      setIsOtpPopupOpen(true);
+    } catch (err) {
+      console.error(err);
+      setOtpError("Failed to send OTP");
+      setIsOtpPopupOpen(true);
+    } finally {
+      setIsOtpSending(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otpValue) return;
+    setIsOtpVerifying(true);
+    setOtpError("");
+    try {
+      const res = await fetch(`https://admission-api.odpay.in/api/verify/otp?mobile=${formData.mobile}&otp=${otpValue}&source=erp`);
+      const data = await res.json();
+      if (data.type === "error" || data.status === false || data.success === false) {
+        setOtpError(data.message || "Invalid OTP");
+      } else {
+        setOtpStatus("verified");
+        setIsOtpPopupOpen(false);
+        setOtpValue("");
+      }
+    } catch (err) {
+      console.error(err);
+      setOtpError("Failed to verify OTP");
+    } finally {
+      setIsOtpVerifying(false);
+    }
+  };
+
+  const handleCloseOtpPopup = () => {
+    setIsOtpPopupOpen(false);
+    setOtpStatus("not_verified");
+    setOtpValue("");
+    setOtpError("");
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-[#0f4a25]/20 pb-20">
       {/* Camera Modal Overlay */}
@@ -406,6 +466,47 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
               <Button onClick={takePhoto} className="h-16 w-16 rounded-full bg-white hover:bg-slate-200 shadow-[0_0_20px_rgba(255,255,255,0.3)] flex items-center justify-center group">
                 <div className="h-12 w-12 rounded-full border-[5px] border-slate-950 flex items-center justify-center group-active:scale-90 transition-all" />
               </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* OTP Popup Modal */}
+      {isOtpPopupOpen && (
+        <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <Card className="w-full max-w-sm bg-white border-0 shadow-2xl animate-in zoom-in-95 rounded-3xl overflow-hidden">
+            <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="text-slate-800 font-black uppercase tracking-widest text-[11px] flex items-center gap-2"><Lock className="w-4 h-4 text-[#dbb13b]" /> OTP Verification</h3>
+              <Button variant="ghost" size="icon" onClick={handleCloseOtpPopup} className="text-slate-400 hover:text-rose-500 rounded-full"><X className="w-5 h-5" /></Button>
+            </div>
+            <div className="p-8 space-y-6">
+              <div className="text-center space-y-2">
+                <div className="bg-[#eaf1ec] w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Phone className="w-5 h-5 text-[#0f4a25]" />
+                </div>
+                <h4 className="font-bold text-slate-800">Enter Verification Code</h4>
+                <p className="text-xs text-slate-500 font-medium">We've sent an OTP to {formData.mobile}</p>
+              </div>
+              
+              <div className="space-y-4">
+                <Input 
+                  placeholder="Enter OTP" 
+                  value={otpValue} 
+                  onChange={(e) => setOtpValue(e.target.value)} 
+                  className="h-14 text-center text-2xl tracking-widest font-black border-2 border-slate-200 rounded-xl bg-slate-50 focus-visible:bg-white focus-visible:border-[#0f4a25] focus-visible:ring-4 focus-visible:ring-[#0f4a25]/10 transition-all outline-none" 
+                  maxLength={6}
+                />
+                {otpError && <p className="text-xs text-rose-500 font-bold text-center">{otpError}</p>}
+                
+                <Button 
+                  onClick={handleVerifyOtp} 
+                  disabled={!otpValue || isOtpVerifying} 
+                  className="w-full h-14 text-white text-sm font-black uppercase tracking-widest transition-all rounded-xl" 
+                  style={{ backgroundColor: PRIMARY_GREEN }}
+                >
+                  {isOtpVerifying ? <Loader2 className="w-5 h-5 animate-spin" /> : "Verify OTP"}
+                </Button>
+              </div>
             </div>
           </Card>
         </div>
@@ -453,7 +554,7 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
                   </Label>
                   <RadioGroup
                     value={formData.toMeetType}
-                    onValueChange={(val) => { setFormData(prev => ({ ...prev, toMeetType: val })); setSelectedProfile(null); setSearchQuery(""); }}
+                    onValueChange={(val) => { setFormData(prev => ({ ...prev, toMeetType: val, regarding: "" })); setSelectedProfile(null); setSearchQuery(""); }}
                     className="flex p-1.5 bg-slate-100/80 rounded-2xl w-full border border-slate-200/60"
                   >
                     {['employee', 'student', 'other'].map((type) => (
@@ -546,8 +647,17 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
                     <Input id="name" placeholder="E.g. John Doe" value={formData.name} onChange={handleInputChange} className="h-14 border-2 border-slate-200 rounded-xl px-4 bg-slate-50 focus-visible:bg-white focus-visible:border-[#0f4a25] focus-visible:ring-4 focus-visible:ring-[#0f4a25]/10 font-bold text-slate-800 text-base shadow-sm transition-all outline-none" />
                   </div>
                   <div className="space-y-3">
-                    <Label className="text-[11px] font-black uppercase text-[#0f4a25] tracking-wider">Mobile Number</Label>
-                    <Input id="mobile" placeholder="E.g. +91 9876543210" value={formData.mobile} onChange={handleInputChange} className="h-14 border-2 border-slate-200 rounded-xl px-4 bg-slate-50 focus-visible:bg-white focus-visible:border-[#0f4a25] focus-visible:ring-4 focus-visible:ring-[#0f4a25]/10 font-bold text-slate-800 text-base shadow-sm transition-all outline-none" />
+                    <div className="flex justify-between items-center">
+                      <Label className="text-[11px] font-black uppercase text-[#0f4a25] tracking-wider">Mobile Number</Label>
+                      {otpStatus === 'verified' && <span className="text-[10px] text-emerald-600 font-black uppercase tracking-widest flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Verified</span>}
+                      {otpStatus === 'not_verified' && <span className="text-[10px] text-rose-600 font-black uppercase tracking-widest flex items-center gap-1"><X className="w-3 h-3" /> Not Verified</span>}
+                    </div>
+                    <div className="flex gap-2">
+                      <Input id="mobile" placeholder="E.g. +91 9876543210" value={formData.mobile} onChange={handleInputChange} className="h-14 border-2 flex-1 border-slate-200 rounded-xl px-4 bg-slate-50 focus-visible:bg-white focus-visible:border-[#0f4a25] focus-visible:ring-4 focus-visible:ring-[#0f4a25]/10 font-bold text-slate-800 text-base shadow-sm transition-all outline-none" />
+                      <Button type="button" onClick={handleSendOtp} disabled={!formData.mobile || isOtpSending || otpStatus === 'verified'} className="h-14 px-5 rounded-xl font-bold uppercase tracking-wider text-xs transition-all bg-slate-200 hover:bg-slate-300 text-slate-700 disabled:opacity-50">
+                        {isOtpSending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Verify"}
+                      </Button>
+                    </div>
                   </div>
                   <div className="space-y-3">
                     <Label className="text-[11px] font-black uppercase text-[#0f4a25] tracking-wider">Organization / Company</Label>
@@ -563,7 +673,24 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
                   </div>
                   <div className="space-y-3 md:col-span-2 mt-2">
                     <Label className="text-[11px] font-black uppercase text-[#0f4a25] tracking-wider">Purpose of Visit (Regarding)</Label>
-                    <Textarea id="regarding" placeholder="Briefly describe the reason for this visit..." value={formData.regarding} onChange={handleInputChange} className="min-h-[100px] border-2 border-slate-200 rounded-xl px-4 py-4 bg-slate-50 focus-visible:bg-white focus-visible:border-[#0f4a25] focus-visible:ring-4 focus-visible:ring-[#0f4a25]/10 font-semibold text-slate-800 text-base shadow-sm resize-none transition-all outline-none" />
+                    {formData.toMeetType === 'other' ? (
+                      <RadioGroup
+                        value={formData.regarding}
+                        onValueChange={(val) => setFormData(prev => ({ ...prev, regarding: val }))}
+                        className="flex gap-4"
+                      >
+                        {['Official', 'Non Official'].map((type) => (
+                          <div key={type} className="flex-1">
+                            <label className={`flex items-center justify-center py-4 px-4 rounded-xl cursor-pointer transition-all font-bold text-sm uppercase tracking-wider border-2 ${formData.regarding === type ? 'bg-[#eaf1ec] border-[#0f4a25] text-[#0f4a25] shadow-sm' : 'border-slate-200 bg-slate-50 text-slate-500 hover:border-[#0f4a25]/50 hover:bg-white'}`}>
+                              <RadioGroupItem value={type} className="sr-only" />
+                              {type}
+                            </label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    ) : (
+                      <Textarea id="regarding" placeholder="Briefly describe the reason for this visit..." value={formData.regarding} onChange={handleInputChange} className="min-h-[100px] border-2 border-slate-200 rounded-xl px-4 py-4 bg-slate-50 focus-visible:bg-white focus-visible:border-[#0f4a25] focus-visible:ring-4 focus-visible:ring-[#0f4a25]/10 font-semibold text-slate-800 text-base shadow-sm resize-none transition-all outline-none" />
+                    )}
                   </div>
                 </div>
 
