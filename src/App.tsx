@@ -97,19 +97,19 @@ function LoginScreen({ onLoginSuccess }: { onLoginSuccess: (token: string) => vo
 // Helper to extract Google Drive File ID
 const extractFileId = (url: string | null | undefined) => {
   if (!url || typeof url !== 'string') return null;
-  
+
   // 1. Google Drive URLs (/d/ID or ?id=ID)
   const driveMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if (driveMatch) return driveMatch[1];
-  
+
   // 2. Identity proxy URLs (extract ID from segment after /image-proxy/)
   if (url.includes('image-proxy/')) {
     return url.split('image-proxy/').pop()?.split(/[?#]/)[0] || null;
   }
-  
+
   // 3. Full URL but no Drive/Proxy markers - could be a direct ID if short and no special chars
   if (url.length > 20 && !url.includes('/') && !url.includes('.')) return url;
-  
+
   return null;
 };
 
@@ -169,7 +169,7 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
 
   const fetchAllStudents = async () => {
     if (allStudents.length > 0) return;
-    
+
     // Check localStorage cache first
     const cached = localStorage.getItem(`students_${ENTITY_ID}`);
     if (cached) {
@@ -230,14 +230,32 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
       setShowDropdown(true);
       const query = searchQuery.toLowerCase();
       if (formData.toMeetType === "student") {
-        if (allStudents.length === 0 && !isFetchingData) fetchAllStudents();
-        setSearchResults(allStudents.filter((s: any) => s.name?.toLowerCase().includes(query) || s.phone?.includes(query) || s.regNo?.toLowerCase().includes(query)).slice(0, 15));
+        setIsFetchingData(true);
+        fetch(`https://fee2-api.odpay.in/api/search/student?search=${encodeURIComponent(searchQuery)}&entity=${ENTITY_ID}&session=${SESSION}`, {
+          headers: { "Authorization": token }
+        })
+          .then(res => res.json())
+          .then(result => {
+            const data = Array.isArray(result) ? result : Array.isArray(result.data) ? result.data : [];
+            setSearchResults(data.slice(0, 15));
+          })
+          .catch(err => console.error(err))
+          .finally(() => setIsFetchingData(false));
       } else if (formData.toMeetType === "employee") {
-        if (allEmployees.length === 0 && !isFetchingData) fetchAllEmployees();
-        setSearchResults(allEmployees.filter((e: any) => e.name?.toLowerCase().includes(query) || e.mobile?.includes(query) || e.employeeId?.toLowerCase().includes(query)).slice(0, 15));
+        setIsFetchingData(true);
+        fetch(`https://fee2-api.odpay.in/api/search/employee?search=${encodeURIComponent(searchQuery)}&entity=${ENTITY_ID}&session=${SESSION}`, {
+          headers: { "Authorization": token }
+        })
+          .then(res => res.json())
+          .then(result => {
+            const data = Array.isArray(result) ? result : Array.isArray(result.data) ? result.data : [];
+            setSearchResults(data.slice(0, 15));
+          })
+          .catch(err => console.error(err))
+          .finally(() => setIsFetchingData(false));
       }
     } else { setShowDropdown(false); }
-  }, [searchQuery, allStudents, allEmployees, formData.toMeetType]);
+  }, [searchQuery, allStudents, formData.toMeetType]);
 
   useEffect(() => {
     fetchVisitors();
@@ -256,16 +274,16 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
 
   const updateWithLiveData = (liveData: any, targetRegNo: string, profile: any) => {
     if (!liveData) return;
-    
+
     setSelectedProfile((prev: any) => {
       // Guard: Only update if the user hasn't switched to a different student in the meantime
       if (prev?.regNo !== targetRegNo) return prev;
 
       const findPhoto = (keyBase: string, profileKey: string) => {
         return extractFileId(
-          liveData[`${keyBase}'s Photograph`] || 
-          liveData[`${keyBase}'s Photo`] || 
-          liveData[`${keyBase}Photo`] || 
+          liveData[`${keyBase}'s Photograph`] ||
+          liveData[`${keyBase}'s Photo`] ||
+          liveData[`${keyBase}Photo`] ||
           liveData[`${keyBase}Photograph`] ||
           profile[`${keyBase}'s Photograph`] ||
           profile[`${keyBase}'s Photo`] ||
@@ -487,21 +505,21 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
                 <h4 className="font-bold text-slate-800">Enter Verification Code</h4>
                 <p className="text-xs text-slate-500 font-medium">We've sent an OTP to {formData.mobile}</p>
               </div>
-              
+
               <div className="space-y-4">
-                <Input 
-                  placeholder="Enter OTP" 
-                  value={otpValue} 
-                  onChange={(e) => setOtpValue(e.target.value)} 
-                  className="h-14 text-center text-2xl tracking-widest font-black border-2 border-slate-200 rounded-xl bg-slate-50 focus-visible:bg-white focus-visible:border-[#0f4a25] focus-visible:ring-4 focus-visible:ring-[#0f4a25]/10 transition-all outline-none" 
+                <Input
+                  placeholder="Enter OTP"
+                  value={otpValue}
+                  onChange={(e) => setOtpValue(e.target.value)}
+                  className="h-14 text-center text-2xl tracking-widest font-black border-2 border-slate-200 rounded-xl bg-slate-50 focus-visible:bg-white focus-visible:border-[#0f4a25] focus-visible:ring-4 focus-visible:ring-[#0f4a25]/10 transition-all outline-none"
                   maxLength={6}
                 />
                 {otpError && <p className="text-xs text-rose-500 font-bold text-center">{otpError}</p>}
-                
-                <Button 
-                  onClick={handleVerifyOtp} 
-                  disabled={!otpValue || isOtpVerifying} 
-                  className="w-full h-14 text-white text-sm font-black uppercase tracking-widest transition-all rounded-xl" 
+
+                <Button
+                  onClick={handleVerifyOtp}
+                  disabled={!otpValue || isOtpVerifying}
+                  className="w-full h-14 text-white text-sm font-black uppercase tracking-widest transition-all rounded-xl"
                   style={{ backgroundColor: PRIMARY_GREEN }}
                 >
                   {isOtpVerifying ? <Loader2 className="w-5 h-5 animate-spin" /> : "Verify OTP"}
@@ -774,7 +792,19 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
                           });
 
                           return photos.map((photo, idx) => (
-                            <div key={idx} className="space-y-2 group cursor-pointer">
+                            <div 
+                              key={idx} 
+                              className="space-y-2 group cursor-pointer"
+                              onClick={() => {
+                                if (photo.label === 'Father') {
+                                  setFormData(prev => ({ ...prev, name: selectedProfile.fatherName || '', mobile: selectedProfile.phone || '' }));
+                                } else if (photo.label === 'Mother') {
+                                  setFormData(prev => ({ ...prev, name: selectedProfile.motherName || '', mobile: selectedProfile.phone || '' }));
+                                } else if (photo.label === 'Guardian') {
+                                  setFormData(prev => ({ ...prev, name: selectedProfile.guardianName || '', mobile: selectedProfile.phone || '' }));
+                                }
+                              }}
+                            >
                               <div className="aspect-[3/4] rounded-xl bg-black/20 overflow-hidden border border-white/10 relative shadow-lg">
                                 <img
                                   src={getImageUrl(photo.id)!}
