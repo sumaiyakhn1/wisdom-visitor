@@ -141,8 +141,6 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [selectedProfile, setSelectedProfile] = useState<any>(null);
-  const [allStudents, setAllStudents] = useState<any[]>([]);
-  const [allEmployees, setAllEmployees] = useState<any[]>([]);
   const [isRefreshingProfile, setIsRefreshingProfile] = useState(false);
 
   // OTP Verification States
@@ -200,7 +198,7 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
           .finally(() => setIsFetchingData(false));
       }
     } else { setShowDropdown(false); }
-  }, [searchQuery, allStudents, formData.toMeetType]);
+  }, [searchQuery, formData.toMeetType]);
 
   useEffect(() => {
     fetchVisitors();
