@@ -167,68 +167,13 @@ function VisitorDashboard({ token, onLogout }: { token: string; onLogout: () => 
     finally { setIsLoadingVisitors(false); }
   };
 
-  const fetchAllStudents = async () => {
-    if (allStudents.length > 0) return;
 
-    // Check localStorage cache first
-    const cached = localStorage.getItem(`students_${ENTITY_ID}`);
-    if (cached) {
-      try {
-        const { data, timestamp } = JSON.parse(cached);
-        if (Date.now() - timestamp < 3600000) { // 1 hour cache
-          setAllStudents(data);
-          return;
-        }
-      } catch (e) { localStorage.removeItem(`students_${ENTITY_ID}`); }
-    }
 
-    setIsFetchingData(true);
-    try {
-      const response = await fetch("https://others-api.odpay.in/api/list/student", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": token },
-        body: JSON.stringify({ entity: ENTITY_ID, session: SESSION }),
-      });
-      const result = await response.json();
-      const students = result.data || [];
-      setAllStudents(students);
-      // Cache the result
-      localStorage.setItem(`students_${ENTITY_ID}`, JSON.stringify({ data: students, timestamp: Date.now() }));
-    } finally { setIsFetchingData(false); }
-  };
 
-  const fetchAllEmployees = async () => {
-    if (allEmployees.length > 0) return;
-
-    // Check localStorage cache first
-    const cached = localStorage.getItem(`employees_${ENTITY_ID}`);
-    if (cached) {
-      try {
-        const { data, timestamp } = JSON.parse(cached);
-        if (Date.now() - timestamp < 3600000) {
-          setAllEmployees(data);
-          return;
-        }
-      } catch (e) { localStorage.removeItem(`employees_${ENTITY_ID}`); }
-    }
-
-    setIsFetchingData(true);
-    try {
-      const response = await fetch(`https://others-api.odpay.in/api/list/Employee?entity=${ENTITY_ID}&showInactive=true`, {
-        headers: { "Authorization": token },
-      });
-      const result = await response.json();
-      const employees = Array.isArray(result) ? result : [];
-      setAllEmployees(employees);
-      // Cache the result
-      localStorage.setItem(`employees_${ENTITY_ID}`, JSON.stringify({ data: employees, timestamp: Date.now() }));
-    } finally { setIsFetchingData(false); }
-  };
 
   useEffect(() => {
     if (searchQuery.length >= 1) {
       setShowDropdown(true);
-      const query = searchQuery.toLowerCase();
       if (formData.toMeetType === "student") {
         setIsFetchingData(true);
         fetch(`https://fee2-api.odpay.in/api/search/student?search=${encodeURIComponent(searchQuery)}&entity=${ENTITY_ID}&session=${SESSION}`, {
